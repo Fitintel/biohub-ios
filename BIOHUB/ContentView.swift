@@ -36,6 +36,9 @@ class BluetoothViewController: UIViewController, CBCentralManagerDelegate {
     // Connected peripheral
     private var connectedPeripheral: CBPeripheral? = nil
     
+    // Peripheral delegate
+    private var peripheralDelegate: FitnetPeripheralDelegate? = nil
+    
     // Called when bluetooth state is updated (ie. on, off, unsupported)
     func centralManagerDidUpdateState(_ central: CBCentralManager) {
         switch central.state {
@@ -102,6 +105,9 @@ class BluetoothViewController: UIViewController, CBCentralManagerDelegate {
     func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
         // Successfully connected. Store reference to peripheral if not already done.
         log.debug("[BluetoothViewController] Connected to peripheral!")
+        self.peripheralDelegate = FitnetPeripheralDelegate()
+        peripheral.delegate = self.peripheralDelegate!
+        peripheral.discoverServices(nil)
     }
     
     override func viewDidLoad() {
