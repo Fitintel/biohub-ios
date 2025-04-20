@@ -29,8 +29,12 @@ struct BluetoothViewControllerRepresentable: UIViewControllerRepresentable {
 }
 
 class BluetoothViewController: UIViewController, CBCentralManagerDelegate {
+    
     // Core Bluetooth Central Manager
     private var centralManager: CBCentralManager!
+    
+    // Connected peripheral
+    private var connectedPeripheral: CBPeripheral? = nil
     
     // Called when bluetooth state is updated (ie. on, off, unsupported)
     func centralManagerDidUpdateState(_ central: CBCentralManager) {
@@ -66,8 +70,38 @@ class BluetoothViewController: UIViewController, CBCentralManagerDelegate {
     // Scans for FITNET servies
     func scanServices() {
         // TODO: Implement me
-        // centralManager.scanForPeripherals -> see delegate method
         log.debug("[BluetoothViewController] Scanning for FITNET devices...")
+        centralManager.scanForPeripherals(withServices: nil)
+    }
+    
+    func isFitnetPeripheral(peripheral: CBPeripheral, advertisementData: [String: Any]) -> Bool {
+        if (advertisementData.contains(where: {
+            (k, v) -> Bool in
+            k == CBAdvertisementDataManufacturerDataKey
+        })) {
+            let manufData = advertisementData[CBAdvertisementDataManufacturerDataKey] as! NSData
+            let bytes: [UInt8] = [0xF1, 0x72, 0xE7, 0x00]
+            if manufData.isEqual(to: Data(bytes)) {
+                return true
+            }
+        }
+        return false
+    }
+    
+    // Callback when advertisement packet from peripheral is recieved
+    func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
+        
+        if (isFitnetPeripheral(peripheral: peripheral, advertisementData: advertisementData)) {
+            log.info("[BluetoothViewController] Found FITNET Peripheral")
+            centralManager.connect(peripheral)
+            self.connectedPeripheral = peripheral
+        }
+    }
+    
+    // Callback when peripheral is connected
+    func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
+        // Successfully connected. Store reference to peripheral if not already done.
+        log.debug("[BluetoothViewController] Connected to peripheral!")
     }
     
     override func viewDidLoad() {
