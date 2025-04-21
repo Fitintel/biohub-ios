@@ -36,11 +36,11 @@ class BluetoothPeripheralDelegate: NSObject, ObservableObject, CBPeripheralDeleg
         guard let services = peripheral.services else {
             return
         }
-        log.info("[\(Self.TAG)] Discovered services \(services)")
+        log.debug("[\(Self.TAG)] Discovered services \(services)")
         discoverCharacteristics(peripheral: peripheral)
         
         for service in services {
-            fitnetServices.loadService(service)
+            let _ = fitnetServices.loadService(service)
         }
     }
     
@@ -52,16 +52,16 @@ class BluetoothPeripheralDelegate: NSObject, ObservableObject, CBPeripheralDeleg
         }
         // Consider storing important characteristics internally for easy access and equivalency checks later.
         // From here, can read/write to characteristics or subscribe to notifications as desired.
-        log.info("[\(Self.TAG)] Discovered characteristics \(characteristics)")
+        log.debug("[\(Self.TAG)] Discovered characteristics \(characteristics)")
         
         for char in characteristics {
-            fitnetServices.loadCharacteristic(char)
+            let _ = fitnetServices.loadCharacteristic(char)
         }
     }
     
     // Called when a characteristic has been read
     func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
-        fitnetServices.notifyRead(characteristic)
+        let _ = fitnetServices.notifyRead(characteristic)
     }
     
 }

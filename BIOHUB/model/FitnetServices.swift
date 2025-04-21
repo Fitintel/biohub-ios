@@ -16,6 +16,9 @@ class FitnetServices: FitnetPeripheralService {
     // Device information service
     let deviceInfoService: DeviceInformationService
     
+    // Test service
+    let testService: TestService
+    
     // All services. Put more frequently used services at the start
     let allServices: [any FitnetPeripheralService]
     
@@ -25,7 +28,10 @@ class FitnetServices: FitnetPeripheralService {
         let deviceInfoService = DeviceInformationService(peripheral)
         self.deviceInfoService = deviceInfoService
         
-        self.allServices = [deviceInfoService]
+        let testService = TestService(peripheral)
+        self.testService = testService
+        
+        self.allServices = [deviceInfoService, testService]
     }
     
     // Called when a service is discovered

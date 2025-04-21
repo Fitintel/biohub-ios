@@ -31,41 +31,18 @@ class DeviceInformationService: FitnetPeripheralService {
 
     // Saves service info
     func loadService(_ service: CBService) -> Bool {
-        if service.uuid == DeviceInformationService.SERVICE_UUID {
-            log.info("[\(Self.TAG)] Found service UUID")
-            foundService = true
-            return true
-        }
-        return false
+        return Self.loadService(tag: Self.TAG, service: service,
+                                uuid: Self.SERVICE_UUID,
+                                setFound: { foundService = true })
     }
     
     // Saves characteristic info
     func loadCharacteristic(_ char: CBCharacteristic) -> Bool {
-        // Check if service found
-        if !foundService {
-            log.error("[\(Self.TAG)] Has not found service UUID yet.")
-            return false
-        }
-        
-        var found = false
-        
-        // Check for characteristics
-        if char.uuid == Self.MANUF_NAME_STR_CHAR {
-            log.info("[\(Self.TAG)] Found \"Manufacturer Name String\" Service")
-            chars.updateValue(char, forKey: DeviceInformationService.MANUF_NAME_STR_CHAR)
-            found = true
-        } else if char.uuid == Self.FIRM_REV_STR_CHAR {
-            log.info("[\(Self.TAG)] Found \"Firmware Revision String\" Service")
-            chars.updateValue(char, forKey: DeviceInformationService.FIRM_REV_STR_CHAR)
-            found = true
-        }
-        
-        if chars.count == Self.NUM_CHARS {
-            self.isLoaded = true
-            log.info("[\(Self.TAG)] Loaded")
-        }
-        
-        return found
+        return Self.loadCharacteristic(tag: Self.TAG,
+                                       checkedChar: char,
+                                       foundService: foundService,
+                                       chars: [Self.MANUF_NAME_STR_CHAR, Self.FIRM_REV_STR_CHAR],
+                                       setFound: { cb in chars.updateValue(cb, forKey: cb.uuid) })
     }
     
     // Called when a read is done
