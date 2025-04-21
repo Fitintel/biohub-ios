@@ -9,9 +9,10 @@ import SwiftUI
 
 @main
 struct BIOHUBApp: App {
+    
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            TestView()
         }
     }
 }
