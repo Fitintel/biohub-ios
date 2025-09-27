@@ -7,7 +7,9 @@
 
 import CoreBluetooth
 import SwiftUI
+import Observation
 
+@Observable
 class TestService: FitnetPeripheralService {
     static let TAG = "TestService"
     
@@ -23,7 +25,7 @@ class TestService: FitnetPeripheralService {
     private var chars: Dictionary<CBUUID, CBCharacteristic> = Dictionary()
     var peripheral: CBPeripheral
  
-    @Published var isLoaded = false
+    var isLoaded = false
 
     init(_ peripheral: CBPeripheral) {
         self.peripheral = peripheral

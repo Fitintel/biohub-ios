@@ -8,7 +8,9 @@
 
 import CoreBluetooth
 import os.log
+import Observation
 
+@Observable
 class DeviceInformationService: FitnetPeripheralService {
     static let TAG = "DeviceInformationService"
     
@@ -20,20 +22,26 @@ class DeviceInformationService: FitnetPeripheralService {
     private var foundService = false
     private var chars: Dictionary<CBUUID, CBCharacteristic> = Dictionary()
     var peripheral: CBPeripheral
- 
-    @Published var isLoaded = false
-    @Published var manufNameStr: String?
-    @Published var firmwareRevStr: String?
+    
+    var isLoaded = false
+    var manufNameStr: String?
+    var firmwareRevStr: String?
     
     init(_ peripheral: CBPeripheral) {
         self.peripheral = peripheral
     }
-
+    
     // Saves service info
     func loadService(_ service: CBService) -> Bool {
         return Self.loadService(tag: Self.TAG, service: service,
                                 uuid: Self.SERVICE_UUID,
-                                setFound: { foundService = true })
+                                setFound: {
+            foundService = true
+            
+            // Read firmware revision and manuf name when created
+            self.readFirmwareRevString()
+            self.readManufacturerNameString()
+        })
     }
     
     // Saves characteristic info
@@ -64,7 +72,7 @@ class DeviceInformationService: FitnetPeripheralService {
         }
         return false
     }
-
+    
     
     // Reads the manufacturer name string. manufNameStr will be updated when it is completed
     func readManufacturerNameString() {

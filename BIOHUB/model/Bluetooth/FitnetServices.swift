@@ -10,6 +10,8 @@ import SwiftUI
 
 class FitnetServices: FitnetPeripheralService {
     
+    let uuid: UUID = UUID()
+    
     // Connected peripheral
     let peripheral: CBPeripheral
     

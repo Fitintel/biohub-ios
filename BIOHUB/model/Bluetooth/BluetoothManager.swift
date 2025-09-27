@@ -7,7 +7,9 @@
 
 import CoreBluetooth
 import SwiftUI
+import Observation
 
+@Observable
 class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate {
     static let TAG = "BluetoothManager"
     
@@ -21,20 +23,23 @@ class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate {
     private var peripheralDelegates = Dictionary<CBPeripheral, BluetoothPeripheralDelegate>()
     
     // Whether the bluetooth is on or not
-    @Published var isBluetoothOn = false
+    var isBluetoothOn = false
+    
+    // Whether the device supports bluetooth
+    var isBluetoothSupported = true
     
     // Whether services have been initialized or not
-    @Published var isInitialized = false
+    var isInitialized = false
+    
+    // Services for connected peripherals
+    var peripherals: [FitnetServices] {
+        Array(connectedPeripherals.values)
+    }
     
     // Singleton
     private override init() {
         super.init()
         centralManager = CBCentralManager(delegate: self, queue: nil)
-    }
-    
-    // Returns the first peripheral's services
-    func getFirstPeripheralServices() -> FitnetServices? {
-        return self.connectedPeripherals.first?.value
     }
     
     // Called when bluetooth state is updated (ie. on, off, unsupported)
@@ -54,12 +59,11 @@ class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate {
             log.info("[\(Self.TAG)] Bluetooth resetting, waiting for next state...")
             break
         case .unauthorized:
-            // TODO: Prompt user to enable Bluetooth in settings
             self.isBluetoothOn = false
             log.warning("[\(Self.TAG)] Bluetooth is unauthorized!")
             break
         case .unsupported:
-            // TODO: Alert user that their device does not support Bluetooth
+            self.isBluetoothSupported = false
             self.isBluetoothOn = false
             log.error("[\(Self.TAG)] Bluetooth is unsupported!")
             break

@@ -12,7 +12,7 @@ struct BIOHUBApp: App {
     
     var body: some Scene {
         WindowGroup {
-            TestView()
+            MainView()
         }
     }
 }
