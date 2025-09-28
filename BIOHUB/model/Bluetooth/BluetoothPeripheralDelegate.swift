@@ -14,9 +14,9 @@ class BluetoothPeripheralDelegate: NSObject, ObservableObject, CBPeripheralDeleg
     static let TAG = "BluetoothPeripheralDelegate"
     
     private let peripheral: CBPeripheral
-    private let fitnetServices: FitnetServices
+    private let fitnetServices: Biodyn
     
-    init(peripheral: CBPeripheral, fitnetServices: FitnetServices) {
+    init(peripheral: CBPeripheral, fitnetServices: Biodyn) {
         self.peripheral = peripheral
         self.fitnetServices = fitnetServices
     }

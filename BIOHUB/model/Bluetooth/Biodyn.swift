@@ -7,13 +7,14 @@
 
 import CoreBluetooth
 import SwiftUI
+import Observation
 
-class FitnetServices: FitnetPeripheralService {
+@Observable
+class Biodyn: FitnetPeripheralService, PBiodyn {
+    typealias TTest = TestService
+    typealias TDeviceInfo = DeviceInformationService
     
     let uuid: UUID = UUID()
-    
-    // Connected peripheral
-    let peripheral: CBPeripheral
     
     // Device information service
     let deviceInfoService: DeviceInformationService
@@ -21,6 +22,9 @@ class FitnetServices: FitnetPeripheralService {
     // Test service
     let testService: TestService
     
+    // Connected peripheral
+    let peripheral: CBPeripheral
+
     // All services. Put more frequently used services at the start
     let allServices: [any FitnetPeripheralService]
     

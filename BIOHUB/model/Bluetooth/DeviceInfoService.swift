@@ -11,7 +11,7 @@ import os.log
 import Observation
 
 @Observable
-class DeviceInformationService: FitnetPeripheralService {
+class DeviceInformationService: FitnetPeripheralService, PDeviceInfoService {
     static let TAG = "DeviceInformationService"
     
     static let SERVICE_UUID = CBUUID(data: Data([UInt8]([0x18, 0x0A])))

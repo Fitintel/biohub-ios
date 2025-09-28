@@ -10,7 +10,7 @@ import SwiftUI
 import Observation
 
 @Observable
-class TestService: FitnetPeripheralService {
+class TestService: FitnetPeripheralService, PTestService {
     static let TAG = "TestService"
     
     static let SERVICE_UUID = CBUUID(data: Data([UInt8]([0xFB, 0x34, 0x9B,

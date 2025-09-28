@@ -10,36 +10,59 @@ import SwiftUI
 import Observation
 
 @Observable
-class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate {
-    static let TAG = "BluetoothManager"
+class BluetoothPeripheralsDiscovery: NSObject, ObservableObject, CBCentralManagerDelegate, PeripheralsDiscovery {
+    typealias Peripheral = Biodyn
+    typealias Listener = PeripheralsDiscoveryListener<Biodyn>
+
+    static let TAG = "BluetoothDiscovery"
     
     // Shared instance
-    static let shared = BluetoothManager()
+    static let shared = BluetoothPeripheralsDiscovery()
     
     // Core Bluetooth Central Manager
     private var centralManager: CBCentralManager!
     // Connected peripherals
-    private var connectedPeripherals = Dictionary<CBPeripheral, FitnetServices>()
+    private var connectedPeripherals = Dictionary<CBPeripheral, Biodyn>()
     private var peripheralDelegates = Dictionary<CBPeripheral, BluetoothPeripheralDelegate>()
     
-    // Whether the bluetooth is on or not
-    var isBluetoothOn = false
-    
-    // Whether the device supports bluetooth
-    var isBluetoothSupported = true
-    
-    // Whether services have been initialized or not
-    var isInitialized = false
-    
-    // Services for connected peripherals
-    var peripherals: [FitnetServices] {
-        Array(connectedPeripherals.values)
+    var isDiscoverySupported: Bool {
+        get {
+            return isBluetoothOn && isBluetoothSupported
+        }
     }
+    
+    var isBluetoothOn = false // Whether the bluetooth is on or not
+    var isBluetoothSupported = true // Whether the device supports bluetooth
+    var isInitialized = false // Whether services have been initialized or not
+    
+    var biodynListeners: [any Listener] = []
     
     // Singleton
     private override init() {
         super.init()
         centralManager = CBCentralManager(delegate: self, queue: nil)
+    }
+    
+    func addListener(_ l: any Listener) {
+        self.biodynListeners.append(l)
+    }
+
+    private func notifyAdded(b: Biodyn) {
+        biodynListeners.forEach { l in l.onConnected(b) }
+    }
+    
+    private func notifyRemoved(b: Biodyn) {
+        biodynListeners.forEach { l in l.onDisconnected(b) }
+    }
+    
+    func getDiscoveryError() -> String {
+        if !isBluetoothSupported {
+            return "Bluetooth is not supported for your device."
+        }
+        if !isBluetoothOn {
+            return "Bluetooth is not on. Enable it in settings."
+        }
+        return ""
     }
     
     // Called when bluetooth state is updated (ie. on, off, unsupported)
@@ -50,7 +73,6 @@ class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate {
             self.isBluetoothOn = true
             break
         case .poweredOff:
-            // TODO: Prompt user to turn on Bluetooth
             self.isBluetoothOn = false
             log.info("[\(Self.TAG)] Bluetooth is off!")
             break
@@ -83,8 +105,8 @@ class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate {
         centralManager.scanForPeripherals(withServices: nil)
     }
     
-    // Checks if the provided peripheral is a FITNET peripheral based on the manufacturer data
-    func isFitnetPeripheral(peripheral: CBPeripheral, advertisementData: [String: Any]) -> Bool {
+    // Checks if the provided peripheral is a BIODYN-100 peripheral based on the manufacturer data
+    private func isBiodyn(peripheral: CBPeripheral, advertisementData: [String: Any]) -> Bool {
         if (advertisementData.contains(where: {
             (k, v) -> Bool in
             k == CBAdvertisementDataManufacturerDataKey
@@ -101,10 +123,13 @@ class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate {
     // Callback when advertisement packet from peripheral is recieved
     func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
         
-        if (isFitnetPeripheral(peripheral: peripheral, advertisementData: advertisementData)) {
-            log.info("[\(Self.TAG)] Found FITNET Peripheral")
-            centralManager.connect(peripheral)
-            self.connectedPeripherals.updateValue(FitnetServices(peripheral), forKey: peripheral)
+        // Check if this peripheral is a BIODYN-100
+        if (isBiodyn(peripheral: peripheral, advertisementData: advertisementData)) {
+            log.info("[\(Self.TAG)] Found BIODYN-100")
+            centralManager.connect(peripheral) // Connect
+            let biodyn = Biodyn(peripheral) // Construct
+            self.connectedPeripherals.updateValue(biodyn, forKey: peripheral) // Map & store locally
+            self.notifyAdded(b: biodyn) // Notify listeners
         }
     }
     
@@ -119,6 +144,14 @@ class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate {
         peripheral.discoverServices(nil)
         
         self.isInitialized = true
+    }
+    
+    // Callback when peripheral is disconnected
+    func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: (any Error)?) {
+        log.debug("[\(Self.TAG)] Disconnected from peripheral.")
+        guard let biodyn = self.connectedPeripherals.removeValue(forKey: peripheral) else { return }
+        self.peripheralDelegates.removeValue(forKey: peripheral)
+        self.notifyRemoved(b: biodyn)
     }
     
 }
