@@ -12,9 +12,13 @@ public protocol PeripheralsDiscovery<Peripheral>: Observable {
     associatedtype Listener
     
     var isDiscoverySupported: Bool { get }
+    var isDiscovering: Bool { get }
     
     func getDiscoveryError() -> String
     func addListener(_ l: Listener)
+    
+    func stopDiscovery()
+    func startDiscovery()
 }
 
 public protocol PeripheralsDiscoveryListener<Peripheral> {
