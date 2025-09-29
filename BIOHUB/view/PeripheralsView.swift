@@ -43,6 +43,9 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
                     }
                 }
             }
+            if peripheralsManager.biodynDiscovery.isDiscovering {
+                ProgressView()
+            }
         }
     }
 }

@@ -18,16 +18,16 @@ class TestPeripheralsDiscovery: PeripheralsDiscovery {
     
     private var biodynListeners: [any Listener] = []
     private var biodyns: [Peripheral] = []
+    
+    private var timer: Timer?
+    private var names = ["CALLUM", "ERIC", "JAKE", "MATTEO", "JONAH"]
+    private var versions = ["0.0.1", "0.0.2", "0.0.3", "0.0.4", "0.0.5", "0.0.6", "0.0.7"]
 
     init() {
         log.info("[TestDiscovery] USING DUMMY DATA.")
-        self.addBiodynAfterDelay(seconds: 0.5)
-        self.addBiodynAfterDelay(seconds: 1)
-        Timer.scheduledTimer(withTimeInterval: 1.5, repeats: true) { [weak self] _ in
-            if self?.biodyns.count ?? 3 < 3 {
-                self?.addBiodynAfterDelay(seconds: 0.1)
-            }
-        }
+        self.addBiodynAfterDelay(seconds: 2)
+        self.addBiodynAfterDelay(seconds: 2.7)
+        self.startDiscovery()
     }
     
     func disconnect(_ p: TestBiodyn) {
@@ -39,7 +39,7 @@ class TestPeripheralsDiscovery: PeripheralsDiscovery {
     func addBiodynAfterDelay(seconds: Double) {
         DispatchQueue.main.asyncAfter(deadline: .now() + seconds) {
             if self.isDiscovering {
-                let b = TestBiodyn()
+                let b = TestBiodyn(name: self.names.randomElement()!, ver: self.versions.randomElement()!)
                 self.biodyns.append(b)
                 self.biodynListeners.forEach({ l in l.onConnected(b)})
                 log.info("[TestDiscovery] Added test BIODYN \(b.uuid).")
@@ -67,11 +67,19 @@ class TestPeripheralsDiscovery: PeripheralsDiscovery {
     }
     
     public func stopDiscovery() {
+        timer?.invalidate()
         isDiscovering = false
+        log.info("[TestDiscovery] Stopped discovery")
     }
     
     public func startDiscovery() {
+        timer = Timer.scheduledTimer(withTimeInterval: 2, repeats: true) { [weak self] _ in
+            if self?.biodyns.count ?? 3 < 3 {
+                self?.addBiodynAfterDelay(seconds: 0.3)
+            }
+        }
         isDiscovering = true
+        log.info("[TestDiscovery] Started discovery")
     }
 
     

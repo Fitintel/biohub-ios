@@ -14,9 +14,10 @@ class TestBiodyn: PBiodyn {
     typealias TTest = TestTestService
 
     var uuid: UUID = UUID()
-    var deviceInfoService: TestDeviceInformationService = TestDeviceInformationService()
+    var deviceInfoService: TestDeviceInformationService
     var testService: TestTestService = TestTestService()
     
-    init() {
+    init(name: String, ver: String) {
+        deviceInfoService = TestDeviceInformationService(name, ver)
     }
 }
