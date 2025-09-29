@@ -14,11 +14,14 @@ let log = Logger()
 struct MainView: View {
     
     @State var peripheralsManager = PeripheralsManager(biodynDiscovery: TestPeripheralsDiscovery())
-    
+    @State var fitnet: Fitnet<TestBiodyn, TestPeripheralsDiscovery>? = nil
+
     var body: some View {
-        VStack {
+        if fitnet != nil {
+            NetView(fitnet: $fitnet)
+        } else {
             if peripheralsManager.hasBiodyns {
-                PeripheralsView(peripheralsManager: self.peripheralsManager)
+                PeripheralsView(fitnet: $fitnet, peripheralsManager: peripheralsManager)
             } else if !self.peripheralsManager.biodynDiscovery.isDiscoverySupported {
                 Text(self.peripheralsManager.biodynDiscovery.getDiscoveryError()).multilineTextAlignment(.center)
             } else {

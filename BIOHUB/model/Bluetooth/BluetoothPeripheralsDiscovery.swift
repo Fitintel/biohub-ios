@@ -65,6 +65,23 @@ class BluetoothPeripheralsDiscovery: NSObject, ObservableObject, CBCentralManage
         return ""
     }
     
+    func disconnect(_ p: Biodyn) {
+        var key: CBPeripheral?
+        self.connectedPeripherals.forEach({
+            peripheral, biodyn in
+            if biodyn.uuid == p.uuid {
+                key = peripheral
+            }
+        })
+        if key != nil {
+            self.centralManager.cancelPeripheralConnection(key!)
+            // Remove immediately
+            self.connectedPeripherals.removeValue(forKey: key!)
+            self.peripheralDelegates.removeValue(forKey: key!)
+            self.notifyRemoved(b: p)
+        }
+    }
+    
     // Called when bluetooth state is updated (ie. on, off, unsupported)
     func centralManagerDidUpdateState(_ central: CBCentralManager) {
         switch central.state {

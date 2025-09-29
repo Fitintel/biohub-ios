@@ -19,6 +19,8 @@ public protocol PeripheralsDiscovery<Peripheral>: Observable {
     
     func stopDiscovery()
     func startDiscovery()
+    
+    func disconnect(_ p: Peripheral)
 }
 
 public protocol PeripheralsDiscoveryListener<Peripheral> {

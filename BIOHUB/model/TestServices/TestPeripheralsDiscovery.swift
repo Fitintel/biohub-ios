@@ -10,7 +10,6 @@ import Foundation
 
 @Observable
 class TestPeripheralsDiscovery: PeripheralsDiscovery {
-    
     typealias Peripheral = TestBiodyn
     typealias Listener = PeripheralsDiscoveryListener<Peripheral>
     
@@ -22,17 +21,28 @@ class TestPeripheralsDiscovery: PeripheralsDiscovery {
 
     init() {
         log.info("[TestDiscovery] USING DUMMY DATA.")
-        addBiodynAfterDelay(seconds: 5)
-        removeBiodynAfterDelay(seconds: 10)
+        self.addBiodynAfterDelay(seconds: 0.5)
+        self.addBiodynAfterDelay(seconds: 1)
+        Timer.scheduledTimer(withTimeInterval: 1.5, repeats: true) { [weak self] _ in
+            if self?.biodyns.count ?? 3 < 3 {
+                self?.addBiodynAfterDelay(seconds: 0.1)
+            }
+        }
     }
     
+    func disconnect(_ p: TestBiodyn) {
+        self.biodyns.removeAll(where: { b in b.uuid == p.uuid})
+        self.biodynListeners.forEach({ l in l.onDisconnected(p)})
+        log.info("[TestDiscovery] Disconnected test BIODYN \(p.uuid).")
+    }
+
     func addBiodynAfterDelay(seconds: Double) {
         DispatchQueue.main.asyncAfter(deadline: .now() + seconds) {
             if self.isDiscovering {
-                var b = TestBiodyn()
+                let b = TestBiodyn()
                 self.biodyns.append(b)
                 self.biodynListeners.forEach({ l in l.onConnected(b)})
-                log.info("[TestDiscovery] Added test BIODYN.")
+                log.info("[TestDiscovery] Added test BIODYN \(b.uuid).")
             }
         }
     }
@@ -44,16 +54,16 @@ class TestPeripheralsDiscovery: PeripheralsDiscovery {
                 return
             }
             self.biodynListeners.forEach({ l in l.onDisconnected(b)})
-            log.info("[TestDiscovery] Removed test BIODYN.")
+            log.info("[TestDiscovery] Forcibly removed test BIODYN \(b.uuid).")
         }
     }
-    
+
     func addListener(_ l: any Listener) {
         self.biodynListeners.append(l)
     }
 
     public func getDiscoveryError() -> String {
-        return "Sadly we just can't do anything."
+        return "Sadly we just can't do anything because this is a test."
     }
     
     public func stopDiscovery() {

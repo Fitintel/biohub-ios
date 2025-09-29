@@ -6,6 +6,7 @@
 //
 
 import Observation
+import Foundation
 
 @Observable
 public class PeripheralsManager<B: PBiodyn, BDiscovery: PeripheralsDiscovery<B>>: PeripheralsDiscoveryListener
@@ -21,6 +22,15 @@ where BDiscovery.Listener == any PeripheralsDiscoveryListener<B> {
         self.biodyns = []
         
         self.biodynDiscovery.addListener(self)
+    }
+    
+    // Disconnect all but the listed biodyns
+    public func keepConnected(_ biodyns: Set<UUID>) {
+        self.biodyns.forEach({ biodyn in
+            if !biodyns.contains(biodyn.uuid) {
+                biodynDiscovery.disconnect(biodyn)
+            }
+        })
     }
     
     // Callback for when a BIODYN is discovered

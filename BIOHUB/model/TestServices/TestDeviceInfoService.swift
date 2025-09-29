@@ -6,9 +6,19 @@
 //
 
 import Observation
+import Foundation
 
 @Observable
 class TestDeviceInformationService: PDeviceInfoService {
-    var manufNameStr: String? { get { "FITNET" } }
-    var firmwareRevStr: String? { get { "TEST" } }
+    var manufNameStr: String? = nil
+    var firmwareRevStr: String? = nil
+    
+    init() {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+            self.manufNameStr = "FITNET"
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+            self.firmwareRevStr = "0.0.1"
+        }
+    }
 }
