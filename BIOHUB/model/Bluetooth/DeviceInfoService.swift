@@ -11,7 +11,7 @@ import os.log
 import Observation
 
 @Observable
-class DeviceInformationService: FitnetPeripheralService, PDeviceInfoService {
+public class DeviceInformationService: FitnetPeripheralService, PDeviceInfoService {
     static let TAG = "DeviceInformationService"
     
     static let SERVICE_UUID = CBUUID(data: Data([UInt8]([0x18, 0x0A])))
@@ -24,15 +24,15 @@ class DeviceInformationService: FitnetPeripheralService, PDeviceInfoService {
     var peripheral: CBPeripheral
     
     var isLoaded = false
-    var manufNameStr: String?
-    var firmwareRevStr: String?
+    public var manufNameStr: String?
+    public var firmwareRevStr: String?
     
     init(_ peripheral: CBPeripheral) {
         self.peripheral = peripheral
     }
     
     // Saves service info
-    func loadService(_ service: CBService) -> Bool {
+    public func loadService(_ service: CBService) -> Bool {
         return Self.loadService(tag: Self.TAG, service: service,
                                 uuid: Self.SERVICE_UUID,
                                 setFound: {
@@ -45,7 +45,7 @@ class DeviceInformationService: FitnetPeripheralService, PDeviceInfoService {
     }
     
     // Saves characteristic info
-    func loadCharacteristic(_ char: CBCharacteristic) -> Bool {
+    public func loadCharacteristic(_ char: CBCharacteristic) -> Bool {
         return Self.loadCharacteristic(tag: Self.TAG,
                                        checkedChar: char,
                                        foundService: foundService,
@@ -54,7 +54,7 @@ class DeviceInformationService: FitnetPeripheralService, PDeviceInfoService {
     }
     
     // Called when a read is done
-    func notifyRead(_ char: CBCharacteristic) -> Bool {
+    public func notifyRead(_ char: CBCharacteristic) -> Bool {
         if char.uuid == Self.MANUF_NAME_STR_CHAR {
             if char.value == nil {
                 self.manufNameStr = nil

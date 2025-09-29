@@ -20,13 +20,13 @@ class TestPeripheralsDiscovery: PeripheralsDiscovery {
     private var biodyns: [Peripheral] = []
     
     private var timer: Timer?
-    private var names = ["CALLUM", "ERIC", "JAKE", "MATTEO", "JONAH"]
+    private var names = ["Alpha", "Beta", "Omega", "Epsilon", "Zeta", "Chi", "Psi", "Phi", "Kappa", "Sigma"]
+    private var manufs = ["CALLUM", "ERIC", "JAKE", "MATTEO", "JONAH"]
     private var versions = ["0.0.1", "0.0.2", "0.0.3", "0.0.4", "0.0.5", "0.0.6", "0.0.7"]
+    private let maxDevices = 5
 
     init() {
         log.info("[TestDiscovery] USING DUMMY DATA.")
-        self.addBiodynAfterDelay(seconds: 2)
-        self.addBiodynAfterDelay(seconds: 2.7)
         self.startDiscovery()
     }
     
@@ -39,7 +39,9 @@ class TestPeripheralsDiscovery: PeripheralsDiscovery {
     func addBiodynAfterDelay(seconds: Double) {
         DispatchQueue.main.asyncAfter(deadline: .now() + seconds) {
             if self.isDiscovering {
-                let b = TestBiodyn(name: self.names.randomElement()!, ver: self.versions.randomElement()!)
+                let b = TestBiodyn(name: self.names.randomElement()!,
+                                   manuf: self.manufs.randomElement()!,
+                                   ver: self.versions.randomElement()!)
                 self.biodyns.append(b)
                 self.biodynListeners.forEach({ l in l.onConnected(b)})
                 log.info("[TestDiscovery] Added test BIODYN \(b.uuid).")
@@ -73,9 +75,10 @@ class TestPeripheralsDiscovery: PeripheralsDiscovery {
     }
     
     public func startDiscovery() {
-        timer = Timer.scheduledTimer(withTimeInterval: 2, repeats: true) { [weak self] _ in
-            if self?.biodyns.count ?? 3 < 3 {
-                self?.addBiodynAfterDelay(seconds: 0.3)
+        let md = self.maxDevices
+        timer = Timer.scheduledTimer(withTimeInterval: 0.6, repeats: true) { [weak self] _ in
+            if self?.biodyns.count ?? md < md {
+                self?.addBiodynAfterDelay(seconds: [0.1, 0.2, 0.3, 0.4, 0.5].randomElement()!)
             }
         }
         isDiscovering = true

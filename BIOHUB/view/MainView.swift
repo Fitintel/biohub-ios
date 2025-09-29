@@ -11,24 +11,40 @@ import OSLog
 
 let log = Logger()
 
-struct MainView: View {
-    
-    @State var peripheralsManager = PeripheralsManager(biodynDiscovery: TestPeripheralsDiscovery())
-    @State var fitnet: Fitnet<TestBiodyn, TestPeripheralsDiscovery>? = nil
 
+struct MainView<B: PBiodyn, BD: PeripheralsDiscovery<B>>: View
+where BD.Listener == any PeripheralsDiscoveryListener<B> {
+    
+    @Bindable var app: AppState<B, BD>
+    
     var body: some View {
-        if fitnet != nil {
-            NetView(fitnet: $fitnet)
-        } else {
-            if peripheralsManager.hasBiodyns {
-                PeripheralsView(fitnet: $fitnet, peripheralsManager: peripheralsManager)
-            } else if !self.peripheralsManager.biodynDiscovery.isDiscoverySupported {
-                Text(self.peripheralsManager.biodynDiscovery.getDiscoveryError()).multilineTextAlignment(.center)
-            } else {
-                VStack {
-                    Text("Scanning for FITNET devices")
-                    ProgressView()
+        Group {
+            TabView(selection: $app.selectedTab) {
+                NavigationStack(path: $app.home.path) {
+                    HomeView()
+                        .navigationTitle("BIOHUB Home")
+                        .navigationDestination(for: HomeViewRoute.self) { route in
+                            switch route {
+                            case .home: HomeView()
+                            }
+                        }
                 }
+                .tabItem { Label("Home", systemImage: "house") }
+                .tag(Tab.home)
+                
+                NavigationStack(path: $app.net.path) {
+                    CreateNetView(app: app)
+                        .navigationTitle("Create Net")
+                        .navigationDestination(for: NetViewRoute.self) { route in
+                            switch route {
+                            case .configure: ConfigureNetView(app: app)
+                            case .create: CreateNetView(app: app)
+                            case .selfTest: SelfTestNetView(app: app, netMode: SelfTestNetMode(app.fitnet))
+                            }
+                        }
+                }
+                .tabItem { Label("Create Net", systemImage: "antenna.radiowaves.left.and.right") }
+                .tag(Tab.net)
             }
         }
     }

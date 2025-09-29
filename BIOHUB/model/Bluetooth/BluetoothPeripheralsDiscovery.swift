@@ -10,9 +10,9 @@ import SwiftUI
 import Observation
 
 @Observable
-class BluetoothPeripheralsDiscovery: NSObject, ObservableObject, CBCentralManagerDelegate, PeripheralsDiscovery {
-    typealias Peripheral = Biodyn
-    typealias Listener = PeripheralsDiscoveryListener<Biodyn>
+public class BluetoothPeripheralsDiscovery: NSObject, ObservableObject, CBCentralManagerDelegate, PeripheralsDiscovery {
+    public typealias Peripheral = Biodyn
+    public typealias Listener = PeripheralsDiscoveryListener<Biodyn>
 
     static let TAG = "BluetoothDiscovery"
     
@@ -43,29 +43,29 @@ class BluetoothPeripheralsDiscovery: NSObject, ObservableObject, CBCentralManage
         centralManager = CBCentralManager(delegate: self, queue: nil)
     }
     
-    func stopDiscovery() {
+    public func stopDiscovery() {
         isDiscovering = false
         log.debug("[\(Self.TAG)] Stopped scanning for FITNET devices")
         centralManager.stopScan()
     }
     
-    func startDiscovery() {
+    public func startDiscovery() {
         isDiscovering = true
         log.debug("[\(Self.TAG)] Scanning for FITNET devices...")
         centralManager.scanForPeripherals(withServices: nil)
     }
     
-    func getDiscoveryError() -> String {
+    public func getDiscoveryError() -> String {
         if !isBluetoothSupported {
             return "Bluetooth is not supported for your device."
         }
         if !isBluetoothOn {
-            return "Bluetooth is not on. Enable it in settings."
+            return "Bluetooth is not on. Enable it in settings to connect to FITNET devices."
         }
         return ""
     }
     
-    func disconnect(_ p: Biodyn) {
+    public func disconnect(_ p: Biodyn) {
         var key: CBPeripheral?
         self.connectedPeripherals.forEach({
             peripheral, biodyn in
@@ -83,7 +83,7 @@ class BluetoothPeripheralsDiscovery: NSObject, ObservableObject, CBCentralManage
     }
     
     // Called when bluetooth state is updated (ie. on, off, unsupported)
-    func centralManagerDidUpdateState(_ central: CBCentralManager) {
+    public func centralManagerDidUpdateState(_ central: CBCentralManager) {
         switch central.state {
         case .poweredOn:
             self.isBluetoothOn = true
@@ -132,7 +132,7 @@ class BluetoothPeripheralsDiscovery: NSObject, ObservableObject, CBCentralManage
     }
     
     // Callback when advertisement packet from peripheral is recieved
-    func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
+    public func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
         
         // Check if this peripheral is a BIODYN-100
         if (isBiodyn(peripheral: peripheral, advertisementData: advertisementData)) {
@@ -145,7 +145,7 @@ class BluetoothPeripheralsDiscovery: NSObject, ObservableObject, CBCentralManage
     }
     
     // Callback when peripheral is connected
-    func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
+    public func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
         // Successfully connected. Store reference to peripheral if not already done.
         log.debug("[\(Self.TAG)] Connected to peripheral!")
         peripheralDelegates.updateValue(BluetoothPeripheralDelegate(peripheral: peripheral, fitnetServices: self.connectedPeripherals[peripheral]!),
@@ -158,14 +158,14 @@ class BluetoothPeripheralsDiscovery: NSObject, ObservableObject, CBCentralManage
     }
     
     // Callback when peripheral is disconnected
-    func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: (any Error)?) {
+    public func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: (any Error)?) {
         log.debug("[\(Self.TAG)] Disconnected from peripheral.")
         guard let biodyn = self.connectedPeripherals.removeValue(forKey: peripheral) else { return }
         self.peripheralDelegates.removeValue(forKey: peripheral)
         self.notifyRemoved(b: biodyn)
     }
     
-    func addListener(_ l: any Listener) {
+    public func addListener(_ l: any Listener) {
         self.biodynListeners.append(l)
     }
 

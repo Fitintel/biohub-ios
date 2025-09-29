@@ -10,14 +10,18 @@ import Foundation
 
 @Observable
 class TestBiodyn: PBiodyn {
+    typealias TSelfTest = TestSelfTestService
     typealias TDeviceInfo = TestDeviceInformationService
     typealias TTest = TestTestService
 
     var uuid: UUID = UUID()
     var deviceInfoService: TestDeviceInformationService
-    var testService: TestTestService = TestTestService()
+    var testService: TestTestService
+    var selfTestService: TestSelfTestService
     
-    init(name: String, ver: String) {
+    init(name: String, manuf: String, ver: String) {
         deviceInfoService = TestDeviceInformationService(name, ver)
+        testService = TestTestService(deviceName: name)
+        selfTestService = TestSelfTestService()
     }
 }

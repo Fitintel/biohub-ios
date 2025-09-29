@@ -8,7 +8,7 @@
 import CoreBluetooth
 
 // A FITNET peripheral service
-protocol FitnetPeripheralService: ObservableObject {
+public protocol FitnetPeripheralService: ObservableObject {
     
     // Returns whether this service was matched
     func loadService(_ service: CBService) -> Bool

@@ -11,6 +11,7 @@ import Foundation
 public protocol PBiodyn: Observable {
     associatedtype TDeviceInfo: PDeviceInfoService
     associatedtype TTest: PTestService
+    associatedtype TSelfTest: PSelfTestService
     
     // UUID of this device
     var uuid: UUID { get }
@@ -20,4 +21,7 @@ public protocol PBiodyn: Observable {
     
     // Test service
     var testService: TTest { get }
+    
+    // Self-test service
+    var selfTestService: TSelfTest { get }
 }

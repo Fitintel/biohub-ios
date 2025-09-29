@@ -10,18 +10,18 @@ import SwiftUI
 import Observation
 
 @Observable
-class Biodyn: FitnetPeripheralService, PBiodyn {
-    typealias TTest = TestService
-    typealias TDeviceInfo = DeviceInformationService
+public class Biodyn: FitnetPeripheralService, PBiodyn {
+    public typealias TTest = TestService
+    public typealias TDeviceInfo = DeviceInformationService
+    public typealias TSelfTest = SelfTestService
     
-    let uuid: UUID = UUID()
+    public let uuid: UUID = UUID()
     
-    // Device information service
-    let deviceInfoService: DeviceInformationService
+    public let deviceInfoService: DeviceInformationService
+    public let testService: TestService
+    public let selfTestService: SelfTestService
     
-    // Test service
-    let testService: TestService
-    
+
     // Connected peripheral
     let peripheral: CBPeripheral
 
@@ -37,11 +37,14 @@ class Biodyn: FitnetPeripheralService, PBiodyn {
         let testService = TestService(peripheral)
         self.testService = testService
         
-        self.allServices = [deviceInfoService, testService]
+        let selfTestService = SelfTestService()
+        self.selfTestService = selfTestService
+        
+        self.allServices = [deviceInfoService, testService, selfTestService]
     }
     
     // Called when a service is discovered
-    func loadService(_ service: CBService) -> Bool {
+    public func loadService(_ service: CBService) -> Bool {
         for s in allServices {
             if s.loadService(service) {
                 return true
@@ -51,7 +54,7 @@ class Biodyn: FitnetPeripheralService, PBiodyn {
     }
     
     // Called when a characteristic is discovered
-    func loadCharacteristic(_ char: CBCharacteristic) -> Bool {
+    public func loadCharacteristic(_ char: CBCharacteristic) -> Bool {
         for s in allServices {
             if s.loadCharacteristic(char) {
                 return true
@@ -61,7 +64,7 @@ class Biodyn: FitnetPeripheralService, PBiodyn {
     }
     
     // Called when a read is done
-    func notifyRead(_ char: CBCharacteristic) -> Bool {
+    public func notifyRead(_ char: CBCharacteristic) -> Bool {
         for s in allServices {
             if s.notifyRead(char) {
                 return true
