@@ -40,6 +40,7 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
                             case .configure: ConfigureNetView(app: app)
                             case .create: CreateNetView(app: app)
                             case .selfTest: SelfTestNetView(app: app, netMode: SelfTestNetMode(app.fitnet))
+                            case .dataCollection: DataCollectionNetView(app: app, netMode: DataCollectionNetMode(app.fitnet))
                             }
                         }
                 }

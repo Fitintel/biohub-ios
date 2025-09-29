@@ -22,6 +22,7 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
                 Text("Net Mode: ")
                 Picker("Net Mode", selection: $netMode) {
                     Text("Self Test").tag(NetMode.selfTest)
+                    Text("Data Collection").tag(NetMode.dataCollection)
                 }
                 Spacer()
             }.padding(.horizontal)
@@ -30,6 +31,9 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
                     switch netMode {
                     case .selfTest:
                         app.net.path.append(NetViewRoute.selfTest)
+                        break
+                    case .dataCollection:
+                        app.net.path.append(NetViewRoute.dataCollection)
                         break
                     }
                 }) {
