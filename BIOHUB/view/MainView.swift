@@ -21,11 +21,12 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
         Group {
             TabView(selection: $app.selectedTab) {
                 NavigationStack(path: $app.home.path) {
-                    HomeView()
+                    HomeView(app: app)
                         .navigationTitle("BIOHUB Home")
                         .navigationDestination(for: HomeViewRoute.self) { route in
                             switch route {
-                            case .home: HomeView()
+                            case .home: HomeView(app: app)
+                            case .signIn: SignInView(app: app)
                             }
                         }
                 }

@@ -7,10 +7,25 @@
 
 import SwiftUI
 
-struct HomeView: View {
-    
+struct HomeView<B: PBiodyn, BD: PeripheralsDiscovery<B>>: View
+where BD.Listener == any PeripheralsDiscoveryListener<B> {
+    @Bindable var app: AppState<B, BD>
+
     var body: some View {
-        Text("Home")
+        VStack {
+            if !app.isLoggedIn {
+                Text("Warning: You are not signed in, some features may not work.")
+                    .multilineTextAlignment(.center)
+                Spacer()
+                Button(action: {
+                    app.home.path.append(.signIn)
+                }) {
+                    Text("Sign In")
+                }
+            }
+            Spacer()
+        }
+        .navigationTitle("Home")
     }
     
 }
