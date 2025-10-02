@@ -1,4 +1,4 @@
-# BioHub IOS
+# Biometric Integration and Orchestration HUB (for iOS)
 
 This is the BIOHUB app for IOS. 
 
