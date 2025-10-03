@@ -16,17 +16,35 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
     var body: some View {
         VStack {
             List (app.fitnet.biodyns, id: \.uuid.uuidString) { item in
-                HStack {
-                    Text("BIODYN \(item.testService.deviceName ?? "???") \(item.deviceInfoService.firmwareRevStr ?? "???")")
-                    Spacer()
-                    if item.selfTestService.selfTestOk == false {
-                        Image(systemName: "xmark")
-                            .foregroundStyle(.red)
-                    } else if item.selfTestService.selfTestOk == true {
-                        Image(systemName: "checkmark")
-                            .foregroundStyle(.green)
-                    } else {
-                        ProgressView()
+                VStack {
+                    HStack {
+                        Text("BIODYN \(item.deviceInfoService.systemIdStr ?? "???") \(item.deviceInfoService.firmwareRevStr ?? "???")")
+                        Spacer()
+                        if item.selfTestService.selfTestState == SelfTestState.completedWithError {
+                            Image(systemName: "xmark")
+                                .foregroundStyle(.red)
+                        } else if item.selfTestService.selfTestState == SelfTestState.completedOk {
+                            Image(systemName: "checkmark")
+                                .foregroundStyle(.green)
+                        } else if item.selfTestService.selfTestState == SelfTestState.running {
+                            ProgressView()
+                        } else if item.selfTestService.selfTestState == SelfTestState.notStarted {
+                            Text("-")
+                        } else if item.selfTestService.selfTestState == SelfTestState.cancelled {
+                            Image(systemName: "xmark")
+                                .foregroundStyle(.yellow)
+                        }
+                    }
+                    if item.selfTestService.selfTestState == SelfTestState.completedWithError {
+                        if item.selfTestService.selfTestError != nil {
+                            HStack {
+                                Text("--->")
+                                Spacer()
+                                Text(item.selfTestService.selfTestError!)
+                            }
+                        } else {
+                            ProgressView()
+                        }
                     }
                 }
             }.listStyle(.plain)

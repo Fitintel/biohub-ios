@@ -11,7 +11,7 @@ import OSLog
 import SwiftUI
 
 class BluetoothPeripheralDelegate: NSObject, ObservableObject, CBPeripheralDelegate {
-    static let TAG = "BluetoothPeripheralDelegate"
+    static let TAG = "Bluetooth Peripheral Delegate"
     
     private let peripheral: CBPeripheral
     private let fitnetServices: Biodyn
@@ -40,7 +40,7 @@ class BluetoothPeripheralDelegate: NSObject, ObservableObject, CBPeripheralDeleg
         discoverCharacteristics(peripheral: peripheral)
         
         for service in services {
-            let _ = fitnetServices.loadService(service)
+            fitnetServices.loadService(service)
         }
     }
     
@@ -55,13 +55,13 @@ class BluetoothPeripheralDelegate: NSObject, ObservableObject, CBPeripheralDeleg
         log.debug("[\(Self.TAG)] Discovered characteristics \(characteristics)")
         
         for char in characteristics {
-            let _ = fitnetServices.loadCharacteristic(char)
+            fitnetServices.loadCharacteristic(service, char)
         }
     }
     
     // Called when a characteristic has been read
     func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
-        let _ = fitnetServices.notifyRead(characteristic)
+        fitnetServices.notifyRead(characteristic)
     }
     
 }

@@ -20,8 +20,8 @@ class TestBiodyn: PBiodyn {
     var selfTestService: TestSelfTestService
     
     init(name: String, manuf: String, ver: String) {
-        deviceInfoService = TestDeviceInformationService(name, ver)
-        testService = TestTestService(deviceName: name)
+        deviceInfoService = TestDeviceInformationService(name, manuf, ver)
+        testService = TestTestService()
         selfTestService = TestSelfTestService()
     }
 }

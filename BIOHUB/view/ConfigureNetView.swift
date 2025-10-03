@@ -57,7 +57,7 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
             Text("Devices in Net").multilineTextAlignment(.center)
             List {
                 ForEach(app.fitnet.biodyns, id: \.uuid.uuidString) { item in
-                    Text("BIODYN \(item.testService.deviceName ?? "???") \(item.deviceInfoService.firmwareRevStr ?? "???")")
+                    Text("BIODYN \(item.deviceInfoService.systemIdStr ?? "???") \(item.deviceInfoService.firmwareRevStr ?? "???")")
                 }
             }.listStyle(.plain)
         }

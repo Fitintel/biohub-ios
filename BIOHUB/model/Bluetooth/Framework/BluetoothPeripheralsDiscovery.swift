@@ -14,7 +14,7 @@ public class BluetoothPeripheralsDiscovery: NSObject, ObservableObject, CBCentra
     public typealias Peripheral = Biodyn
     public typealias Listener = PeripheralsDiscoveryListener<Biodyn>
 
-    static let TAG = "BluetoothDiscovery"
+    static let TAG = "Bluetooth Discovery"
     
     // Shared instance
     static let shared = BluetoothPeripheralsDiscovery()

@@ -10,26 +10,18 @@ import CoreBluetooth
 
 // TODO: implement this class
 @Observable
-public class SelfTestService: FitnetPeripheralService, PSelfTestService {
-    
-    static let TAG = "SelfTestService"
-    
-    public var selfTestOk: Bool?
+public class SelfTestService: FitnetBLEService, PSelfTestService {
+    public var selfTestState: SelfTestState?
     public var selfTestError: String?
     
+    init(_ peripheral: CBPeripheral) {
+        super.init(peripheral,
+                   name: "Self Test Service",
+                   uuid: CBUUID(data: Data([UInt8]([0xA9, 0x12].reversed()))),
+                   characteristics: [])
+    }
+    
     public func runSelfTest() {
-    }
-
-    public func loadCharacteristic(_ char: CBCharacteristic) -> Bool {
-        return false
-    }
-    
-    public func loadService(_ service: CBService) -> Bool {
-        return false
-    }
-    
-    public func notifyRead(_ char: CBCharacteristic) -> Bool {
-        return false
     }
 
 }

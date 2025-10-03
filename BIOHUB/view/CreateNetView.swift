@@ -47,7 +47,7 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
                             }
                         }) {
                             HStack {
-                                Text("BIODYN \(item.testService.deviceName ?? "???") \(item.deviceInfoService.firmwareRevStr ?? "???")")
+                                Text("BIODYN \(item.deviceInfoService.systemIdStr ?? "???") \(item.deviceInfoService.firmwareRevStr ?? "???")")
                                 if selectedDevices.contains(where: { x in x == item.uuid}) {
                                     Spacer()
                                     Image(systemName: "checkmark")

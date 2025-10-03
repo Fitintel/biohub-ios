@@ -10,10 +10,12 @@ import SwiftUI
 import Observation
 
 @Observable
-public class Biodyn: FitnetPeripheralService, PBiodyn {
+public class Biodyn: PBiodyn {
     public typealias TTest = TestService
     public typealias TDeviceInfo = DeviceInformationService
     public typealias TSelfTest = SelfTestService
+    
+    private static let TAG = "Biodyn"
     
     public let uuid: UUID = UUID()
     
@@ -21,12 +23,12 @@ public class Biodyn: FitnetPeripheralService, PBiodyn {
     public let testService: TestService
     public let selfTestService: SelfTestService
     
-
     // Connected peripheral
     let peripheral: CBPeripheral
 
-    // All services. Put more frequently used services at the start
-    let allServices: [any FitnetPeripheralService]
+    let allServices: [FitnetBLEService]
+    var serviceMap = Dictionary<CBUUID, FitnetBLEService>();
+    var charServMap = Dictionary<CBUUID, FitnetBLEService>();
     
     init(_ peripheral: CBPeripheral) {
         self.peripheral = peripheral
@@ -37,40 +39,47 @@ public class Biodyn: FitnetPeripheralService, PBiodyn {
         let testService = TestService(peripheral)
         self.testService = testService
         
-        let selfTestService = SelfTestService()
+        let selfTestService = SelfTestService(peripheral)
         self.selfTestService = selfTestService
         
         self.allServices = [deviceInfoService, testService, selfTestService]
-    }
-    
-    // Called when a service is discovered
-    public func loadService(_ service: CBService) -> Bool {
-        for s in allServices {
-            if s.loadService(service) {
-                return true
+        for s in self.allServices {
+            self.serviceMap.updateValue(s, forKey: s.uuid)
+            for c in s.characteristics {
+                self.charServMap.updateValue(s, forKey: c.uuid)
             }
         }
-        return false
     }
     
-    // Called when a characteristic is discovered
-    public func loadCharacteristic(_ char: CBCharacteristic) -> Bool {
-        for s in allServices {
-            if s.loadCharacteristic(char) {
-                return true
-            }
+    public func loadService(_ service: CBService) {
+        guard let s = serviceMap[service.uuid] else {
+            log.error("[\(Self.TAG)] Tried to load non-biodyn service \(service.uuid)")
+            return
         }
-        return false
+        if !s.loadService(service) {
+            log.error("[\(Self.TAG)] Matched service UUID failed to load \(s.uuid)")
+            return
+        }
     }
     
-    // Called when a read is done
-    public func notifyRead(_ char: CBCharacteristic) -> Bool {
-        for s in allServices {
-            if s.notifyRead(char) {
-                return true
-            }
+    public func loadCharacteristic(_ forService: CBService, _ char: CBCharacteristic) {
+        guard let s = serviceMap[forService.uuid] else {
+            log.error("[\(Self.TAG)] Tried to load characteristic for non-biodyn service \(forService.uuid)")
+            return
         }
-        return false
+        if !s.loadCharacteristic(char) {
+            log.error("[\(Self.TAG)] Service \(forService.uuid) failed to load characteristic \(char.uuid)")
+        }
+    }
+    
+    public func notifyRead(_ forCharacteristic: CBCharacteristic) {
+        guard let s = serviceMap[forCharacteristic.uuid] else {
+            log.error("[\(Self.TAG)] Could not find characteristic \(forCharacteristic.uuid)")
+            return
+        }
+        if !s.notifyRead(forCharacteristic) {
+            log.error("[\(Self.TAG)] Characteristic read \(forCharacteristic.uuid) in \(s.name) failed")
+        }
     }
     
 }
