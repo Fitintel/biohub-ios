@@ -14,7 +14,7 @@ public class FitnetBLEService: ObservableObject {
     
     var name: String
     var uuid: CBUUID
-    var characteristics: [FitnetBLEChar] = []
+    var characteristics: [FitnetBLEChar] { get { Array(characteristicsMap.values) } }
     var foundService: Bool = false
     var characteristicsMap = Dictionary<CBUUID, FitnetBLEChar>();
     var peripheral: CBPeripheral
@@ -26,7 +26,6 @@ public class FitnetBLEService: ObservableObject {
         self.peripheral = peripheral
         self.name = name
         self.uuid = uuid
-        self.characteristics = characteristics
         for char in characteristics {
             characteristicsMap.updateValue(char, forKey: char.uuid)
         }

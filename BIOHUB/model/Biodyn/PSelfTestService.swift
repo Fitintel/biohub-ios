@@ -7,12 +7,13 @@
 
 import Observation
 
-public enum SelfTestState: Int32 {
+public enum SelfTestState: UInt32 {
     case notStarted = 0
     case running = 1
     case completedWithError = 2
     case completedOk = 3
     case cancelled = 4
+    case invalid = 5
 }
 
 public protocol PSelfTestService: Observable {
