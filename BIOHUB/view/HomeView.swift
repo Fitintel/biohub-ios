@@ -9,12 +9,13 @@ import SwiftUI
 
 struct HomeView<B: PBiodyn, BD: PeripheralsDiscovery<B>>: View
 where BD.Listener == any PeripheralsDiscoveryListener<B> {
+    @EnvironmentObject var auth: AuthService
     @Bindable var app: AppState<B, BD>
 
     var body: some View {
         VStack {
             if !app.isLoggedIn {
-                Text("Warning: You are not signed in, some features may not work.")
+                Text("Sign in to access all features")
                     .multilineTextAlignment(.center)
                 Spacer()
                 Button(action: {
@@ -22,6 +23,8 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
                 }) {
                     Text("Sign In")
                 }
+            } else {
+                Text(auth.currentUser?.email ?? "?@?")
             }
             Spacer()
         }

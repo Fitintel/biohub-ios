@@ -26,7 +26,7 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
                     login = !login
                 }) {
                     Text(login ? "Sign Up" : "Log In")
-                }
+                }.disabled(isLoggingIn)
             }
             Spacer()
             Divider()
@@ -72,5 +72,6 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
             return
         }
         let _ = app.home.path.popLast()
+        app.isLoggedIn = true
     }
 }
