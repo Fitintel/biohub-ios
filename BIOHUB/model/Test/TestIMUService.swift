@@ -20,13 +20,22 @@ public class TestIMUService: PIMUService, TestWithDelays {
     private func randomFloat3(_ max: Float) -> SIMD3<Float> {
         return SIMD3<Float>(randomFloat(max), randomFloat(max), randomFloat(max))
     }
+    
+    private func randomFloat3(_ min: Float, _ max: Float) -> SIMD3<Float> {
+        let d = (max - min) / 2
+        return randomFloat3(max - min) - SIMD3<Float>(d, d, d)
+    }
 
     public func readPlanarAccel() {
         doNow {
             if self.planarAccel == nil {
                 self.planarAccel = self.randomFloat3(4)
             } else {
-                self.planarAccel! += self.randomFloat(0.4) - 0.2
+                if abs(self.planarAccel!.sum()) > 5 {
+                    self.planarAccel! *= 0.98
+                } else {
+                    self.planarAccel! += self.randomFloat3(-0.1, 0.1)
+                }
             }
         }
     }
@@ -34,19 +43,27 @@ public class TestIMUService: PIMUService, TestWithDelays {
     public func readGyroAccel() {
         doNow {
             if self.gyroAccel == nil {
-                self.gyroAccel = self.randomFloat3(3)
+                self.gyroAccel = self.randomFloat3(2)
             } else {
-                self.gyroAccel! += self.randomFloat(0.4) - 0.2
+                if abs(self.gyroAccel!.sum()) > 5 {
+                    self.gyroAccel! *= 0.98
+                } else {
+                    self.gyroAccel! += self.randomFloat3(-0.14, 0.14)
+                }
             }
         }
     }
     
     public func readMagnetometer() {
         doNow {
-            if self.gyroAccel == nil {
-                self.gyroAccel = self.randomFloat3(2)
+            if self.magnetometer == nil {
+                self.magnetometer = self.randomFloat3(3)
             } else {
-                self.gyroAccel! += self.randomFloat(0.2) - 0.1
+                if abs(self.magnetometer!.sum()) > 5 {
+                    self.magnetometer! *= 0.98
+                } else {
+                    self.magnetometer! += self.randomFloat3(-0.05, 0.05)
+                }
             }
         }
     }
