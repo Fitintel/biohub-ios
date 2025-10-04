@@ -7,6 +7,7 @@
 
 import Foundation
 import Observation
+import CoreBluetooth
 
 // Read-only string characteristic
 @Observable
@@ -15,5 +16,9 @@ public class FitnetStringChar: FitnetBLEChar {
     
     public override func onRead(_ data: Data) {
         self.value = String(data: data, encoding: .ascii)
+    }
+    
+    public override func writeValue(data: Data, type: CBCharacteristicWriteType) {
+        log.error("[\(self.name)] Cannot write to read-only char")
     }
 }

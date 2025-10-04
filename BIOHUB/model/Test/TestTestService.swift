@@ -10,7 +10,7 @@ import Foundation
 import os.log
 
 @Observable
-class TestTestService: PTestService {
+class TestTestService: PTestService, TestWithDelays {
     
     var ledValue: Bool? = nil
     
@@ -25,7 +25,7 @@ class TestTestService: PTestService {
     }
     
     func readLEDValue() {
-        DispatchQueue.main.asyncAfter(deadline: .now() + [0.1, 0.3, 0.4, 0.5, 0.9, 1.2, 2, 2.5].randomElement()!) {
+        doAtSomePoint {
             self.ledValue = self.ledInternal
         }
     }
