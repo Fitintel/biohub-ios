@@ -8,11 +8,12 @@
 import SwiftUI
 import Observation
 import FirebaseCore
+import FirebaseAppCheck
 
 // Overarching app state
 @Observable
 class AppState<B: PBiodyn, BD: PeripheralsDiscovery<B>>
-    where BD.Listener == any PeripheralsDiscoveryListener<B> {
+where BD.Listener == any PeripheralsDiscoveryListener<B> {
     
     var selectedTab: Tab = .home
     var home = HomeRouter()
@@ -41,9 +42,9 @@ enum NetViewRoute: Hashable { case create, configure, selfTest, dataCollection }
 struct BIOHUBApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
     
-//  @State private var app = AppState(deviceDiscovery: BluetoothPeripheralsDiscovery.shared)
+    //  @State private var app = AppState(deviceDiscovery: BluetoothPeripheralsDiscovery.shared)
     @State private var app = AppState(deviceDiscovery: TestPeripheralsDiscovery())
-
+    
     var body: some Scene {
         WindowGroup {
             MainView(app: app)
@@ -54,8 +55,10 @@ struct BIOHUBApp: App {
 class AppDelegate: NSObject, UIApplicationDelegate {
     func application(_ application: UIApplication,
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
-      FirebaseApp.configure()
-      return true
+        // TODO: register with App Check instead of using debug token
+        AppCheck.setAppCheckProviderFactory(AppCheckDebugProviderFactory())
+        FirebaseApp.configure()
+        return true
     }
 }
 

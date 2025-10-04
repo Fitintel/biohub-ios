@@ -55,9 +55,22 @@
 		F25588B42D9E5EE700934B98 /* BIOHUBUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BIOHUBUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		F266A3772E90FFDC00866E28 /* Exceptions for "BIOHUB" folder in "BIOHUB" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = F25588992D9E5EE500934B98 /* BIOHUB */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		F255889C2D9E5EE500934B98 /* BIOHUB */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				F266A3772E90FFDC00866E28 /* Exceptions for "BIOHUB" folder in "BIOHUB" target */,
+			);
 			path = BIOHUB;
 			sourceTree = "<group>";
 		};
@@ -478,6 +491,9 @@
 				DEVELOPMENT_TEAM = 5R3YNVXH9H;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = BIOHUB/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = BIOHUB;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
 				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "BIOHUB needs to discover FITNET Bluetooth devices.";
 				INFOPLIST_KEY_NSBluetoothPeripheralUsageDescription = "BIOHUB needs to discover FITNET Bluetooth devices.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -509,6 +525,9 @@
 				DEVELOPMENT_TEAM = 5R3YNVXH9H;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = BIOHUB/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = BIOHUB;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
 				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "BIOHUB needs to discover FITNET Bluetooth devices.";
 				INFOPLIST_KEY_NSBluetoothPeripheralUsageDescription = "BIOHUB needs to discover FITNET Bluetooth devices.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;

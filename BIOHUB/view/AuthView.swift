@@ -11,9 +11,11 @@ struct AuthView<B: PBiodyn, BD: PeripheralsDiscovery<B>>: View
 where BD.Listener == any PeripheralsDiscoveryListener<B> {
     @EnvironmentObject var authService: AuthService
     @Bindable var app: AppState<B, BD>
-    @State var username: String = ""
-    @State var password: String = ""
-    @State var login: Bool = true
+    @State private var email: String = ""
+    @State private var password: String = ""
+    @State private var login: Bool = true
+    @State private var isLoggingIn: Bool = false
+    @State private var loginError: String? = nil
 
     var body: some View {
         VStack {
@@ -26,27 +28,49 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
                     Text(login ? "Sign Up" : "Log In")
                 }
             }
+            Spacer()
             Divider()
             Text("\(login ? "Log In" : "Sign Up") With Email")
                 .font(.subheadline)
-            TextField(text: $username) {
-                Text("Username")
-            }
-            TextField(text: $password) {
+            TextField(text: $email) {
+                Text("Email")
+            }.disabled(isLoggingIn)
+            SecureField(text: $password) {
                 Text("Password")
+            }.disabled(isLoggingIn)
+            Button(login ? "Log In" : "Sign Up") {
+                Task { await authenticateEmailPassword() }
+            }.disabled(isLoggingIn)
+            if loginError != nil {
+                Text(loginError!).multilineTextAlignment(.center)
             }
-            Button(action: {
-                // TODO: Actually sign in
-                app.isLoggedIn = true
-                let _ = app.home.path.popLast()
-            }) {
-                Text(login ? "Log In" : "Sign Up")
+            if isLoggingIn {
+                ProgressView()
             }
             Divider()
-            SignInWithAppleButtonView(login: $login)
             Spacer()
+            //Divider()
+            // Sign in with apple is only available when paying ...
+            // SignInWithAppleButtonView(login: $login, isLoggingIn: $isLoggingIn)
         }
         .padding()
         .navigationTitle("\(login ? "Log In to" : "Sign Up for") FITNET")
+    }
+    
+    private func authenticateEmailPassword() async {
+        isLoggingIn = true
+        do {
+            if login {
+                try await authService.signIn(email: email, password: password)
+            } else {
+                try await authService.signUp(email: email, password: password)
+            }
+        } catch {
+            log.error("[AuthView] Failed to sign in/up user: \(error.localizedDescription)")
+            loginError = error.localizedDescription
+            isLoggingIn = false
+            return
+        }
+        let _ = app.home.path.popLast()
     }
 }
