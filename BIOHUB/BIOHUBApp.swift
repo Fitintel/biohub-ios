@@ -7,7 +7,9 @@
 
 import SwiftUI
 import Observation
+import FirebaseCore
 
+// Overarching app state
 @Observable
 class AppState<B: PBiodyn, BD: PeripheralsDiscovery<B>>
     where BD.Listener == any PeripheralsDiscoveryListener<B> {
@@ -24,17 +26,20 @@ class AppState<B: PBiodyn, BD: PeripheralsDiscovery<B>>
     }
 }
 
+// Main page app tabs
 enum Tab { case home, net }
+
+// UI routes within tabs
 @Observable
 final class HomeRouter { var path: [HomeViewRoute] = [] }
+enum HomeViewRoute: Hashable { case home, signIn }
 @Observable
 final class NetRouter { var path: [NetViewRoute] = [] }
-
-enum HomeViewRoute: Hashable { case home, signIn }
 enum NetViewRoute: Hashable { case create, configure, selfTest, dataCollection }
 
 @main
 struct BIOHUBApp: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
     
 //  @State private var app = AppState(deviceDiscovery: BluetoothPeripheralsDiscovery.shared)
     @State private var app = AppState(deviceDiscovery: TestPeripheralsDiscovery())
@@ -45,3 +50,12 @@ struct BIOHUBApp: App {
         }
     }
 }
+
+class AppDelegate: NSObject, UIApplicationDelegate {
+    func application(_ application: UIApplication,
+                     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
+      FirebaseApp.configure()
+      return true
+    }
+}
+

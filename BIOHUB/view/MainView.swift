@@ -15,6 +15,7 @@ let log = Logger()
 struct MainView<B: PBiodyn, BD: PeripheralsDiscovery<B>>: View
 where BD.Listener == any PeripheralsDiscoveryListener<B> {
     
+    @State var authService = AuthService()
     @Bindable var app: AppState<B, BD>
     
     var body: some View {
@@ -26,7 +27,7 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
                         .navigationDestination(for: HomeViewRoute.self) { route in
                             switch route {
                             case .home: HomeView(app: app)
-                            case .signIn: SignInView(app: app)
+                            case .signIn: AuthView(app: app)
                             }
                         }
                 }
@@ -49,6 +50,7 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
                 .tag(Tab.net)
             }
         }
+        .environmentObject(authService)
     }
 }
 

@@ -20,19 +20,24 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
                     HStack {
                         Text("BIODYN \(item.deviceInfoService.systemIdStr ?? "???") \(item.deviceInfoService.firmwareRevStr ?? "???")")
                         Spacer()
-                        if item.selfTestService.selfTestState == SelfTestState.completedWithError {
+                        switch item.selfTestService.selfTestState {
+                        case .completedWithError:
                             Image(systemName: "xmark")
                                 .foregroundStyle(.red)
-                        } else if item.selfTestService.selfTestState == SelfTestState.completedOk {
+                        case .completedOk:
                             Image(systemName: "checkmark")
                                 .foregroundStyle(.green)
-                        } else if item.selfTestService.selfTestState == SelfTestState.running {
+                        case .running:
                             ProgressView()
-                        } else if item.selfTestService.selfTestState == SelfTestState.notStarted {
+                        case .notStarted:
                             Text("-")
-                        } else if item.selfTestService.selfTestState == SelfTestState.cancelled {
+                        case .cancelled:
                             Image(systemName: "xmark")
                                 .foregroundStyle(.yellow)
+                        case .invalid:
+                            Text("!").foregroundStyle(.red)
+                        case .none:
+                            Text("?")
                         }
                     }
                     if item.selfTestService.selfTestState == SelfTestState.completedWithError {
@@ -44,6 +49,13 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
                             }
                         } else {
                             ProgressView()
+                        }
+                    }
+                    if item.selfTestService.selfTestState == SelfTestState.invalid {
+                        HStack {
+                            Text("--->")
+                            Spacer()
+                            Text("Could not retrieve results")
                         }
                     }
                 }

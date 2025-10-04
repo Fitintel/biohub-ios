@@ -62,7 +62,7 @@ public class SelfTestService: FitnetBLEService, PSelfTestService {
         }
         
         override func onRead(_ data: Data) {
-            var intData = data.withUnsafeBytes({ ptr in
+            let intData = data.withUnsafeBytes({ ptr in
                 return ptr.load(as: UInt32.self)
             })
             if intData > SelfTestState.cancelled.rawValue {
