@@ -16,6 +16,10 @@ public protocol PIMUService: Observable {
     func readPlanarAccel()
     func readGyroAccel()
     func readMagnetometer()
+    
+    func readPlanarAccelAsync() async
+    func readGyroAccelAsync() async
+    func readMangetometerAsync() async
 }
 
 public extension PIMUService {

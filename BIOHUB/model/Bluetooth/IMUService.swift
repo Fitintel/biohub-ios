@@ -6,12 +6,16 @@
 //
 
 import CoreBluetooth
+import Observation
 
+@Observable
 public class IMUService: FitnetBLEService, PIMUService {
+    
     private static let SERVICE_UUID = CBUUID(data: Data([UInt8]([0xC3, 0x32])))
     private static let PLANAR_ACC_UUID = CBUUID(data: Data([UInt8]([0xC3, 0x50])))
     private static let GYRO_ACC_UUID = CBUUID(data: Data([UInt8]([0xC3, 0x51])))
     private static let MAGNETO_UUID = CBUUID(data: Data([UInt8]([0xC3, 0x52])))
+    private static let ASYNC_READ_TIMEOUT: Duration = .milliseconds(100)
     
     public var planarAccel: SIMD3<Float>? { get { planarChar.value } }
     public var gyroAccel: SIMD3<Float>? { get { gyroChar.value } }
@@ -49,4 +53,16 @@ public class IMUService: FitnetBLEService, PIMUService {
         self.magChar.readValue()
     }
     
+    public func readPlanarAccelAsync() async {
+        await self.planarChar.readValueAsync(timeout: Self.ASYNC_READ_TIMEOUT)
+    }
+    
+    public func readGyroAccelAsync() async {
+        await self.gyroChar.readValueAsync(timeout: Self.ASYNC_READ_TIMEOUT)
+    }
+    
+    public func readMangetometerAsync() async {
+        await self.magChar.readValueAsync(timeout: Self.ASYNC_READ_TIMEOUT)
+    }
+
 }

@@ -23,6 +23,7 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
                 Picker("Net Mode", selection: $netMode) {
                     Text("Self Test").tag(NetMode.selfTest)
                     Text("Data Collection").tag(NetMode.dataCollection)
+                    Text("IMU Readings").tag(NetMode.imu)
                 }
                 Spacer()
             }.padding(.horizontal)
@@ -34,6 +35,9 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
                         break
                     case .dataCollection:
                         app.net.path.append(NetViewRoute.dataCollection)
+                        break
+                    case .imu:
+                        app.net.path.append(NetViewRoute.imu)
                         break
                     }
                 }) {

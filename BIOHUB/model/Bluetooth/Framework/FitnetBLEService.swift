@@ -44,7 +44,7 @@ public class FitnetBLEService: ObservableObject {
                 log.error("[\(self.name)] notified of read, but had no data!")
                 return false
             }
-            c.onRead(data)
+            c.onReadInternal(data)
             wasRead = true
         }
         return wasRead

@@ -5,4 +5,4 @@
 //  Created by Callum Mackenzie on 2025-09-28.
 //
 
-enum NetMode { case selfTest, dataCollection }
+enum NetMode { case selfTest, dataCollection, imu }

@@ -36,7 +36,7 @@ final class HomeRouter { var path: [HomeViewRoute] = [] }
 enum HomeViewRoute: Hashable { case home, signIn }
 @Observable
 final class NetRouter { var path: [NetViewRoute] = [] }
-enum NetViewRoute: Hashable { case create, configure, selfTest, dataCollection }
+enum NetViewRoute: Hashable { case create, configure, selfTest, dataCollection, imu }
 
 @main
 struct BIOHUBApp: App {
