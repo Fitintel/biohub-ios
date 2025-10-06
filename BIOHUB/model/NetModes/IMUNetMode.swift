@@ -35,7 +35,6 @@ where BDiscovery.Listener == any PeripheralsDiscoveryListener<B> {
         return self.ensureStream(biodyn)
     }
     
-    @MainActor
     public func reset() {
         for biodyn in fitnet.biodyns {
             self.ensureStream(biodyn).reset()
@@ -47,13 +46,12 @@ where BDiscovery.Listener == any PeripheralsDiscoveryListener<B> {
         self.pollTask = Task {
             let interval: Duration = .milliseconds(20)
             while !Task.isCancelled {
-                await timerFired()
+                await readIMUAsync()
                 try? await Task.sleep(for: interval)
             }
         }
     }
     
-    @MainActor
     public func stopPolling() {
         log.info("[\(self.TAG)] Stopping polling")
         self.pollTask?.cancel()
@@ -64,38 +62,32 @@ where BDiscovery.Listener == any PeripheralsDiscoveryListener<B> {
         }
     }
     
-    private func timerFired() async {
+    private func readIMUAsync() async {
         await withTaskGroup(of: Void.self) { group in
             for biodyn in fitnet.biodyns {
                 group.addTask {
                     await biodyn.imuService.readPlanarAccelAsync()
                     let readTime = Date.now
                     if biodyn.imuService.planarAccel == nil { return }
-                    await MainActor.run {
-                        self.ensureStream(biodyn).addPlanar(
-                            DatedSIMD3F(readTime: readTime, read: biodyn.imuService.planarAccel!)
-                        )
-                    }
+                    self.ensureStream(biodyn).addPlanar(
+                        DatedSIMD3F(readTime: readTime, read: biodyn.imuService.planarAccel!)
+                    )
                 }
                 group.addTask {
                     await biodyn.imuService.readGyroAccelAsync()
                     let readTime = Date.now
                     if biodyn.imuService.gyroAccel == nil { return }
-                    await MainActor.run {
-                        self.ensureStream(biodyn).addGyro(
-                            DatedSIMD3F(readTime: readTime, read: biodyn.imuService.gyroAccel!)
-                        )
-                    }
+                    self.ensureStream(biodyn).addGyro(
+                        DatedSIMD3F(readTime: readTime, read: biodyn.imuService.gyroAccel!)
+                    )
                 }
                 group.addTask {
                     await biodyn.imuService.readMagnetometerAsync()
                     let readTime = Date.now
                     if biodyn.imuService.magnetometer == nil { return }
-                    await MainActor.run {
-                        self.ensureStream(biodyn).addMag(
-                            DatedSIMD3F(readTime: readTime, read: biodyn.imuService.magnetometer!)
-                        )
-                    }
+                    self.ensureStream(biodyn).addMag(
+                        DatedSIMD3F(readTime: readTime, read: biodyn.imuService.magnetometer!)
+                    )
                 }
             }
             await group.waitForAll()
@@ -115,29 +107,24 @@ where BDiscovery.Listener == any PeripheralsDiscoveryListener<B> {
         public var gyro = DatedSIMD3FSegments()
         public var magneto = DatedSIMD3FSegments()
         
-        @MainActor
         public func addPlanar(_ v: DatedSIMD3F) {
             self.planar.latest.append(v)
         }
         
-        @MainActor
         public func addGyro(_ v: DatedSIMD3F) {
             self.gyro.latest.append(v)
         }
         
-        @MainActor
         public func addMag(_ v: DatedSIMD3F) {
             self.magneto.latest.append(v)
         }
         
-        @MainActor
         public func reset() {
             self.planar.reset()
             self.gyro.reset()
             self.magneto.reset()
         }
         
-        @MainActor
         public func startNewSegment() {
             self.planar.startNewSegment()
             self.gyro.startNewSegment()

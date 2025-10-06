@@ -20,12 +20,10 @@ public class DatedSIMD3FList: Identifiable, Observable {
     public let id = UUID()
     public var simds: [DatedSIMD3F] = []
     
-    @MainActor
     public func append(_ v: DatedSIMD3F) {
         self.simds.append(v)
     }
     
-    @MainActor
     public func reset() {
         self.simds.removeAll()
     }
@@ -38,13 +36,11 @@ public class DatedSIMD3FSegments {
     public let id = UUID()
     public var segments: [DatedSIMD3FList] = [DatedSIMD3FList()]
     
-    @MainActor
     public func reset() {
         self.segments.removeAll()
         self.segments.append(DatedSIMD3FList())
     }
     
-    @MainActor
     public func startNewSegment() {
         // If the last one is empty might as well use it
         if latest.simds.count > 0 {

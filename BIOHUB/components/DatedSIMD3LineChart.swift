@@ -8,14 +8,14 @@
 import SwiftUI
 import simd
 import Charts
+import OSLog
 
 struct DatedSIMD3LineChart: View {
     
     let max: Float
     @Bindable var data: DatedSIMD3FSegments
     @State private var lastSnapshot: [[DatedSIMD3F]] = []
-    @State private var timer: Timer? = nil
-    private let refreshInterval = 1.0 / 20.0
+    @State private var snapshotTask: Task<Void, Never>? = nil
     
     var body: some View {
         Chart {
@@ -24,15 +24,15 @@ struct DatedSIMD3LineChart: View {
                 ForEach(segments[i]) { point in
                     LineMark(x: .value("Time", point.readTime),
                              y: .value("X", point.read.x),
-                             series: .value("Series", "X-\(i)"))
+                             series: .value("Series", "X\(i)"))
                     .foregroundStyle(by: .value("Axis", "X"))
                     LineMark(x: .value("Time", point.readTime),
                              y: .value("Y", point.read.y),
-                             series: .value("Series", "Y-\(i)"))
+                             series: .value("Series", "Y\(i)"))
                     .foregroundStyle(by: .value("Axis", "Y"))
                     LineMark(x: .value("Time", point.readTime),
                              y: .value("Z", point.read.z),
-                             series: .value("Series", "Z-\(i)"))
+                             series: .value("Series", "Z\(i)"))
                     .foregroundStyle(by: .value("Axis", "Z"))
                 }
             }
@@ -45,13 +45,20 @@ struct DatedSIMD3LineChart: View {
         ])
         .frame(height: 250)
         .onAppear {
-            timer = Timer.scheduledTimer(withTimeInterval: refreshInterval, repeats: true) { _ in
-                lastSnapshot = data.segments.map { Array($0.simds) }
+            snapshotTask?.cancel()
+            snapshotTask = Task {
+                let interval: Duration = .milliseconds(90)
+                while !Task.isCancelled {
+                    await MainActor.run {
+                        lastSnapshot = data.segments.map { Array($0.simds) }
+                    }
+                    try? await Task.sleep(for: interval)
+                }
             }
         }
         .onDisappear {
-            timer?.invalidate()
-            timer = nil
+            snapshotTask?.cancel()
+            snapshotTask = nil
         }
     }
 }

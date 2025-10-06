@@ -19,14 +19,18 @@ public class TestIMUService: PIMUService, TestWithDelays {
     private var gi: SIMD3<Float>?
     private var mi: SIMD3<Float>?
 
-    private var timer: Timer?
+    private var updateTask: Task<Void, Never>?
     private var rng = SystemRandomNumberGenerator()
 
     init() {
-        timer = Timer.scheduledTimer(withTimeInterval: 1.0 / 40.0, repeats: true) { _ in
-            self.simulatePlanar()
-            self.simulateGyro()
-            self.simulateMag()
+        updateTask = Task {
+            while !Task.isCancelled {
+                let interval: Duration = .milliseconds(19)
+                self.simulatePlanar()
+                self.simulateGyro()
+                self.simulateMag()
+                try? await Task.sleep(for: interval)
+            }
         }
     }
 
