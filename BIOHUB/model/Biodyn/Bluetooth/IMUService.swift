@@ -61,7 +61,7 @@ public class IMUService: FitnetBLEService, PIMUService {
         await self.gyroChar.readValueAsync(timeout: Self.ASYNC_READ_TIMEOUT)
     }
     
-    public func readMangetometerAsync() async {
+    public func readMagnetometerAsync() async {
         await self.magChar.readValueAsync(timeout: Self.ASYNC_READ_TIMEOUT)
     }
 

@@ -6,38 +6,67 @@
 //
 
 import SwiftUI
+import Charts
 
 struct IMUNetView<B: PBiodyn, BD: PeripheralsDiscovery<B>>: View
 where BD.Listener == any PeripheralsDiscoveryListener<B> {
     
+    private enum IMUReadingType { case planar, gyro, mag }
+    
     @Bindable var app: AppState<B, BD>
     @Bindable var imuNet: IMUNetMode<B, BD>
+    @State private var imuGraph: IMUReadingType = .planar
     
     var body: some View {
         VStack {
-            Button(action: {
-                if imuNet.isPolling {
-                    imuNet.stopPolling()
-                } else {
-                    imuNet.startPolling()
-                }
-            }) {
-                Text(imuNet.isPolling ? "Stop Reading" : "Start Reading")
-            }
-            List (app.fitnet.biodyns, id: \.uuid.uuidString) { item in
+            VStack {
                 HStack {
-                    Text("\(item.deviceInfoService.systemIdStr ?? "UNKNOWN") XYZ:")
+                    Button(action: {
+                        imuNet.isPolling ? imuNet.stopPolling() : imuNet.startPolling()
+                    }) {
+                        Text(imuNet.isPolling ? "Stop Reading" : "Start Reading")
+                    }
                     Spacer()
-                    Text("\(String(format: "%.2f", item.imuService.planarAccel?.x ?? 0))").monospaced()
-                    Spacer()
-                    Text("\(String(format: "%.2f", item.imuService.planarAccel?.y ?? 0))").monospaced()
-                    Spacer()
-                    Text("\(String(format: "%.2f", item.imuService.planarAccel?.z ?? 0))").monospaced()
+                    Picker("IMU Reading", selection: $imuGraph) {
+                        Text("Planar Accel").tag(IMUReadingType.planar)
+                        Text("Gyro Accel").tag(IMUReadingType.gyro)
+                        Text("Magnetometer").tag(IMUReadingType.mag)
+                    }
                 }
-                .animation(nil, value: UUID())
+                HStack {
+                    Button(action: {
+                        imuNet.reset()
+                    }) {
+                        Text("Clear Data")
+                    }
+                }
+            }
+            .padding()
+            List($app.fitnet.biodyns, id: \.uuid.uuidString) { $biodyn in
+                VStack {
+                    HStack {
+                        Text("\(biodyn.deviceInfoService.systemIdStr ?? "UNKNOWN") XYZ:")
+                        Spacer()
+                        switch imuGraph {
+                        case .planar: SIMD3View(simd3: biodyn.imuService.planarAccel)
+                        case .gyro: SIMD3View(simd3: biodyn.imuService.gyroAccel)
+                        case .mag: SIMD3View(simd3: biodyn.imuService.magnetometer)
+                        }
+                    }
+                    .animation(nil, value: UUID())
+                    switch imuGraph {
+                    case .planar: DatedSIMD3LineChart(max: imuNet.maxPlanarAccel, data: imuNet.dataFor(biodyn).planar)
+                    case .gyro: DatedSIMD3LineChart(max: imuNet.maxGyroAccel, data: imuNet.dataFor(biodyn).gyro)
+                    case .mag: DatedSIMD3LineChart(max: imuNet.maxMagnetometer, data: imuNet.dataFor(biodyn).magneto)
+                    }
+                }
             }
         }
         .navigationTitle("IMU Reading")
+        .onDisappear {
+            imuNet.stopPolling()
+            imuNet.reset()
+        }
     }
     
 }

@@ -23,6 +23,6 @@ class TestDeviceInformationService: PDeviceInfoService, TestWithDelays {
         doSoon { self.firmwareRevStr = ver }
         doSoon { self.harwareRevStr = "dummy" }
         doEventually { self.modelNumStr = "\(rng.next())" }
-        doAtSomePoint { self.systemIdStr = name }
+        doSoon { self.systemIdStr = name }
     }
 }

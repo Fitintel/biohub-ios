@@ -8,7 +8,7 @@
 import Observation
 import Foundation
 
-public protocol PBiodyn: Observable {
+public protocol PBiodyn: Observable, Identifiable {
     associatedtype TDeviceInfo: PDeviceInfoService
     associatedtype TTest: PTestService
     associatedtype TSelfTest: PSelfTestService
