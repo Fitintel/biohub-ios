@@ -64,7 +64,7 @@ public class FitnetBLEChar: Observable {
     }
     
     // Waits for read value
-    func readValueAsync(timeout: Duration) async -> Void {
+    func readValueAsync(timeout: Duration) async {
         do {
             try await withThrowingTaskGroup(of: Void.self) { group in
                 group.addTask {

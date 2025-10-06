@@ -49,6 +49,9 @@ where BDiscovery.Listener == any PeripheralsDiscoveryListener<B> {
                 await readIMUAsync()
                 try? await Task.sleep(for: interval)
             }
+            for biodyn in fitnet.biodyns {
+                self.ensureStream(biodyn).startNewSegment()
+            }
         }
     }
     
@@ -56,10 +59,6 @@ where BDiscovery.Listener == any PeripheralsDiscoveryListener<B> {
         log.info("[\(self.TAG)] Stopping polling")
         self.pollTask?.cancel()
         self.pollTask = nil
-        
-        for biodyn in fitnet.biodyns {
-            self.ensureStream(biodyn).startNewSegment()
-        }
     }
     
     private func readIMUAsync() async {
