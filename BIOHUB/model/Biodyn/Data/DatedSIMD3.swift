@@ -9,32 +9,79 @@ import Foundation
 import simd
 import Observation
 
-public struct DatedSIMD3F: Identifiable {
+public struct DatedSIMD3F: Identifiable, Encodable, Decodable {
     public let id = UUID()
     public let readTime: Date
     public let read: SIMD3<Float>
+    
+    public init(readTime: Date, read: SIMD3<Float>) {
+        self.readTime = readTime
+        self.read = read
+    }
+    
+    // Encoding/decoding
+    private enum CodingKeys: String, CodingKey { case readTime, read }
+    public init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        readTime = try container.decode(Date.self, forKey: .readTime)
+        read = try container.decode(SIMD3<Float>.self, forKey: .read)
+    }
+    public func encode(to encoder: any Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try? container.encode(readTime, forKey: .readTime)
+        try? container.encode(read, forKey: .read)
+    }
 }
 
 @Observable
-public class DatedSIMD3FList: Identifiable, Observable {
+public class DatedSIMD3FList: Identifiable, Observable, Encodable, Decodable {
     public let id = UUID()
     public var simds: [DatedSIMD3F] = []
+    public var startTime: Date?
+    public var endTime: Date?
+
+    public init() {}
     
     public func append(_ v: DatedSIMD3F) {
         self.simds.append(v)
+        if endTime == nil || v.readTime > endTime! {
+            endTime = v.readTime
+        }
+        if startTime == nil || v.readTime < startTime! {
+            startTime = v.readTime
+        }
     }
     
     public func reset() {
         self.simds.removeAll()
+        startTime = nil
+        endTime = nil
+    }
+    
+    // Encoding/decoding
+    private enum CodingKeys: String, CodingKey { case simds, startTime, endTime }
+    public required init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        simds = try container.decode([DatedSIMD3F].self, forKey: .simds)
+        startTime = try container.decode(Date.self, forKey: .startTime)
+        endTime = try container.decode(Date.self, forKey: .endTime)
+    }
+    public func encode(to encoder: any Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try? container.encode(simds, forKey: .simds)
+        try? container.encode(startTime, forKey: .startTime)
+        try? container.encode(endTime, forKey: .endTime)
     }
 }
 
 @Observable
-public class DatedSIMD3FSegments {
+public class DatedSIMD3FSegments: Encodable, Decodable, Identifiable, Observable {
     public var latest: DatedSIMD3FList { get { segments.last! } }
     
     public let id = UUID()
     public var segments: [DatedSIMD3FList] = [DatedSIMD3FList()]
+    
+    public init() {}
     
     public func reset() {
         self.segments.removeAll()
@@ -46,5 +93,16 @@ public class DatedSIMD3FSegments {
         if latest.simds.count > 0 {
             self.segments.append(DatedSIMD3FList())
         }
+    }
+    
+    // Encoding/decoding
+    private enum CodingKeys: String, CodingKey { case segments }
+    public required init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        segments = try container.decode([DatedSIMD3FList].self, forKey: .segments)
+    }
+    public func encode(to encoder: any Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try? container.encode(segments, forKey: .segments)
     }
 }

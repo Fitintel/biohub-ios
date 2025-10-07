@@ -17,11 +17,17 @@ where BDiscovery.Listener == any PeripheralsDiscoveryListener<B> {
     public var hasBiodyns: Bool { get { return biodyns.count > 0 }}
     public let biodynDiscovery: BDiscovery
     
+    private var biodynMap = Dictionary<UUID, B>()
+    
     init(_ biodynDiscovery: BDiscovery) {
         self.biodynDiscovery = biodynDiscovery
         self.biodyns = []
         
         self.biodynDiscovery.addListener(self)
+    }
+    
+    public func byUUID(_ uuid: UUID) -> B? {
+        return biodynMap[uuid]
     }
     
     // Disconnect all but the listed biodyns
@@ -36,6 +42,7 @@ where BDiscovery.Listener == any PeripheralsDiscoveryListener<B> {
     // Callback for when a BIODYN is discovered
     public func onConnected(_ p: B) {
         self.biodyns.append(p)
+        self.biodynMap.updateValue(p, forKey: p.uuid)
     }
     
     // Callback for when a BIODYN is disconnected
@@ -43,6 +50,7 @@ where BDiscovery.Listener == any PeripheralsDiscoveryListener<B> {
         self.biodyns.removeAll(where: { b in
             b.uuid == p.uuid
         })
+        self.biodynMap.removeValue(forKey: p.uuid)
     }
     
 }

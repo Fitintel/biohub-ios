@@ -35,6 +35,18 @@ where BDiscovery.Listener == any PeripheralsDiscoveryListener<B> {
         return self.ensureStream(biodyn)
     }
     
+    public func collectedData() -> Dictionary<String, IMUDataStream> {
+        var d = Dictionary<String, IMUDataStream>()
+        for kvp in dataMap {
+            guard let devName = fitnet.byUUID(kvp.key)?.deviceInfoService.systemIdStr else {
+                log.warning("[\(self.TAG)] Skipping unnamed biodyn \(kvp.key)")
+                continue
+            }
+            d.updateValue(kvp.value, forKey: devName)
+        }
+        return d
+    }
+    
     public func reset() {
         for biodyn in fitnet.biodyns {
             self.ensureStream(biodyn).reset()
@@ -98,37 +110,6 @@ where BDiscovery.Listener == any PeripheralsDiscoveryListener<B> {
         let s = IMUDataStream()
         dataMap[biodyn.uuid] = s
         return s
-    }
-    
-    @Observable
-    public class IMUDataStream {
-        public var planar = DatedSIMD3FSegments()
-        public var gyro = DatedSIMD3FSegments()
-        public var magneto = DatedSIMD3FSegments()
-        
-        public func addPlanar(_ v: DatedSIMD3F) {
-            self.planar.latest.append(v)
-        }
-        
-        public func addGyro(_ v: DatedSIMD3F) {
-            self.gyro.latest.append(v)
-        }
-        
-        public func addMag(_ v: DatedSIMD3F) {
-            self.magneto.latest.append(v)
-        }
-        
-        public func reset() {
-            self.planar.reset()
-            self.gyro.reset()
-            self.magneto.reset()
-        }
-        
-        public func startNewSegment() {
-            self.planar.startNewSegment()
-            self.gyro.startNewSegment()
-            self.magneto.startNewSegment()
-        }
     }
     
 }

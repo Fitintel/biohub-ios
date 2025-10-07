@@ -13,9 +13,11 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
     
     private enum IMUReadingType { case planar, gyro, mag }
     
+    @EnvironmentObject var auth: AuthService
     @Bindable var app: AppState<B, BD>
     @Bindable var imuNet: IMUNetMode<B, BD>
     @State private var imuGraph: IMUReadingType = .planar
+    @State private var isUploading: Bool = false
     
     var body: some View {
         VStack {
@@ -33,40 +35,59 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
                         Text("Magnetometer").tag(IMUReadingType.mag)
                     }
                 }
+                .padding()
                 HStack {
                     Button(action: {
                         imuNet.reset()
                     }) {
                         Text("Clear Data")
                     }
+                    Spacer()
+                    Button(action: {
+                        isUploading = true
+                        Task {
+                            do {
+                                try await app.fitnetUser!.uploadIMUData(imuNet.collectedData())
+                                isUploading = false
+                            } catch {
+                                log.error("[IMUNetView] Failed to upload IMU data: \(error.localizedDescription)")
+                            }
+                        }
+                    }) {
+                        Text("Save Session")
+                    }
+                    .disabled(!app.isLoggedIn || imuNet.isPolling || isUploading)
+                    if (isUploading) {
+                        ProgressView()
+                    }
                 }
-            }
-            .padding()
-            List($app.fitnet.biodyns, id: \.uuid.uuidString) { $biodyn in
-                VStack {
-                    HStack {
-                        Text("\(biodyn.deviceInfoService.systemIdStr ?? "UNKNOWN") XYZ:")
-                        Spacer()
+                .padding()
+                List($app.fitnet.biodyns, id: \.uuid.uuidString) { $biodyn in
+                    VStack {
+                        HStack {
+                            Text("\(biodyn.deviceInfoService.systemIdStr ?? "UNKNOWN") XYZ:")
+                            Spacer()
+                            switch imuGraph {
+                            case .planar: SIMD3View(simd3: biodyn.imuService.planarAccel)
+                            case .gyro: SIMD3View(simd3: biodyn.imuService.gyroAccel)
+                            case .mag: SIMD3View(simd3: biodyn.imuService.magnetometer)
+                            }
+                        }
+                        .animation(nil, value: UUID())
                         switch imuGraph {
-                        case .planar: SIMD3View(simd3: biodyn.imuService.planarAccel)
-                        case .gyro: SIMD3View(simd3: biodyn.imuService.gyroAccel)
-                        case .mag: SIMD3View(simd3: biodyn.imuService.magnetometer)
+                        case .planar: DatedSIMD3LineChart(max: imuNet.maxPlanarAccel, data: imuNet.dataFor(biodyn).planar)
+                        case .gyro: DatedSIMD3LineChart(max: imuNet.maxGyroAccel, data: imuNet.dataFor(biodyn).gyro)
+                        case .mag: DatedSIMD3LineChart(max: imuNet.maxMagnetometer, data: imuNet.dataFor(biodyn).magneto)
                         }
                     }
-                    .animation(nil, value: UUID())
-                    switch imuGraph {
-                    case .planar: DatedSIMD3LineChart(max: imuNet.maxPlanarAccel, data: imuNet.dataFor(biodyn).planar)
-                    case .gyro: DatedSIMD3LineChart(max: imuNet.maxGyroAccel, data: imuNet.dataFor(biodyn).gyro)
-                    case .mag: DatedSIMD3LineChart(max: imuNet.maxMagnetometer, data: imuNet.dataFor(biodyn).magneto)
-                    }
                 }
             }
+            .navigationTitle("IMU Reading")
+            .onDisappear {
+                imuNet.stopPolling()
+                imuNet.reset()
+            }
         }
-        .navigationTitle("IMU Reading")
-        .onDisappear {
-            imuNet.stopPolling()
-            imuNet.reset()
-        }
+        
     }
-    
 }

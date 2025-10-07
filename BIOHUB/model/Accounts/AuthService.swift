@@ -26,23 +26,23 @@ final class AuthService: ObservableObject {
     }
     
     // Email/Password
-    func signUp(email: String, password: String) async throws {
+    func signUp(email: String, password: String) async throws -> FitnetUser? {
         let result = try await Auth.auth().createUser(withEmail: email, password: password)
         self.userSession = result.user
         if self.userSession == nil {
             log.error("[AuthService] Logged in but had no user")
-            return
+            return nil
         }
         let fitnetUser = FitnetUser(uid: userSession!.uid, email: email)
         let encodeUser = try Firestore.Encoder().encode(fitnetUser)
         try await Firestore.firestore().collection("Users").document(userSession!.uid).setData(encodeUser)
-        await fetchUser()
+        return await fetchUser()
     }
     
-    func signIn(email: String, password: String) async throws {
+    func signIn(email: String, password: String) async throws -> FitnetUser? {
         let result = try await Auth.auth().signIn(withEmail: email, password: password)
         self.userSession = result.user
-        await fetchUser()
+        return await fetchUser()
     }
     
     func sendPasswordReset(to email: String) async throws {
@@ -57,9 +57,10 @@ final class AuthService: ObservableObject {
         try await Auth.auth().currentUser?.delete()
     }
     
-    func fetchUser() async {
-        guard let uid = userSession?.uid else { return }
-        guard let snapshot = try? await Firestore.firestore().collection("Users").document(uid).getDocument() else { return }
+    func fetchUser() async -> FitnetUser? {
+        guard let uid = userSession?.uid else { return nil }
+        guard let snapshot = try? await Firestore.firestore().collection("Users").document(uid).getDocument() else { return nil }
         self.currentUser = try? snapshot.data(as: FitnetUser.self)
+        return self.currentUser
     }
 }

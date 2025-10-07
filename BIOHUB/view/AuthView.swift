@@ -61,9 +61,9 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
         isLoggingIn = true
         do {
             if login {
-                try await authService.signIn(email: email, password: password)
+                app.fitnetUser = try await authService.signIn(email: email, password: password)
             } else {
-                try await authService.signUp(email: email, password: password)
+                app.fitnetUser = try await authService.signUp(email: email, password: password)
             }
         } catch {
             log.error("[AuthView] Failed to sign in/up user: \(error.localizedDescription)")
@@ -72,6 +72,5 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
             return
         }
         let _ = app.home.path.popLast()
-        app.isLoggedIn = true
     }
 }

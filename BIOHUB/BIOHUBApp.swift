@@ -19,7 +19,8 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
     var home = HomeRouter()
     var net = NetRouter()
     var fitnet: Fitnet<B, BD>
-    var isLoggedIn: Bool = false
+    var fitnetUser: FitnetUser?
+    var isLoggedIn: Bool { get { fitnetUser != nil } }
     
     init(deviceDiscovery: BD) {
         let pm = Fitnet(deviceDiscovery)
