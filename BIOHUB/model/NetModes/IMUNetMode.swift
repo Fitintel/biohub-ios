@@ -42,7 +42,7 @@ where BDiscovery.Listener == any PeripheralsDiscoveryListener<B> {
                 log.warning("[\(self.TAG)] Skipping unnamed biodyn \(kvp.key)")
                 continue
             }
-            d.updateValue(kvp.value, forKey: devName)
+            d.updateValue(kvp.value, forKey: "\(devName)-\(Date.now)")
         }
         return d
     }

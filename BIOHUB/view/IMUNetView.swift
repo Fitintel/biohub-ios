@@ -28,6 +28,7 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
                     }) {
                         Text(imuNet.isPolling ? "Stop Reading" : "Start Reading")
                     }
+                    .disabled(isUploading)
                     Spacer()
                     Picker("IMU Reading", selection: $imuGraph) {
                         Text("Planar Accel").tag(IMUReadingType.planar)
@@ -42,6 +43,7 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
                     }) {
                         Text("Clear Data")
                     }
+                    .disabled(isUploading)
                     Spacer()
                     Button(action: {
                         isUploading = true
