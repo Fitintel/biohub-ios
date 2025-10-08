@@ -20,7 +20,7 @@ class TestPeripheralsDiscovery: PeripheralsDiscovery {
     private var biodyns: [Peripheral] = []
     
     private var timer: Timer?
-    private var names = ["Alpha", "Beta", "Omega", "Epsilon", "Zeta", "Chi", "Psi", "Phi", "Kappa", "Sigma"]
+    private var names = ["Alpha", "Beta", "Omega", "Epsilon", "Zeta", "Chi", "Psi", "Phi", "Kappa", "Sigma", "Gamma", "Delta", "Eta", "Theta", "Iota", "Lambda", "Mu", "Nu", "Xi", "Omicron", "Pi", "Rho", "Tau"]
     private var manufs = ["CALLUM", "ERIC", "JAKE", "MATTEO", "JONAH"]
     private var versions = ["0.0.1", "0.0.2", "0.0.3", "0.0.4", "0.0.5", "0.0.6", "0.0.7"]
     private let maxDevices = 5

@@ -7,24 +7,25 @@
 
 import Observation
 import Foundation
+import simd
 
 @Observable
 public class IMUDataStream: Encodable, Decodable {
-    public var planar = DatedSIMD3FSegments()
-    public var gyro = DatedSIMD3FSegments()
-    public var magneto = DatedSIMD3FSegments()
+    public var planar = DatedFloat3Segments()
+    public var gyro = DatedFloat3Segments()
+    public var magneto = DatedFloat3Segments()
     
     public init() {}
     
-    public func addPlanar(_ v: DatedSIMD3F) {
+    public func addPlanar(_ v: DatedFloat3) {
         self.planar.latest.append(v)
     }
     
-    public func addGyro(_ v: DatedSIMD3F) {
+    public func addGyro(_ v: DatedFloat3) {
         self.gyro.latest.append(v)
     }
     
-    public func addMag(_ v: DatedSIMD3F) {
+    public func addMag(_ v: DatedFloat3) {
         self.magneto.latest.append(v)
     }
     
@@ -44,9 +45,9 @@ public class IMUDataStream: Encodable, Decodable {
     private enum CodingKeys: String, CodingKey { case planar, gyro, mag }
     public required init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        self.planar = try container.decode(DatedSIMD3FSegments.self, forKey: .planar)
-        self.gyro = try container.decode(DatedSIMD3FSegments.self, forKey: .gyro)
-        self.magneto = try container.decode(DatedSIMD3FSegments.self, forKey: .mag)
+        self.planar = try container.decode(DatedQSegments.self, forKey: .planar)
+        self.gyro = try container.decode(DatedQSegments.self, forKey: .gyro)
+        self.magneto = try container.decode(DatedQSegments.self, forKey: .mag)
     }
     public func encode(to encoder: any Encoder) throws {
         var c = encoder.container(keyedBy: CodingKeys.self)

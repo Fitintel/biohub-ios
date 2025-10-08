@@ -9,12 +9,19 @@ import Foundation
 import simd
 import Observation
 
-public struct DatedSIMD3F: Identifiable, Encodable, Decodable {
+public typealias DatedFloat3 = DatedQuanta<SIMD3<Float>>
+public typealias DatedFloat3Segments = DatedQSegments<SIMD3<Float>>
+
+public typealias DatedFloat = DatedQuanta<Float>
+public typealias DatedFloatSegments = DatedQSegments<Float>
+
+public struct DatedQuanta<T>: Identifiable, Encodable, Decodable
+where T: Encodable & Decodable {
     public let id = UUID()
     public let readTime: Date
-    public let read: SIMD3<Float>
+    public let read: T
     
-    public init(readTime: Date, read: SIMD3<Float>) {
+    public init(readTime: Date, read: T) {
         self.readTime = readTime
         self.read = read
     }
@@ -24,7 +31,7 @@ public struct DatedSIMD3F: Identifiable, Encodable, Decodable {
     public init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         readTime = Date(timeIntervalSince1970: try container.decode(Double.self, forKey: .readTime))
-        read = try container.decode(SIMD3<Float>.self, forKey: .read)
+        read = try container.decode(T.self, forKey: .read)
     }
     public func encode(to encoder: any Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
@@ -34,50 +41,52 @@ public struct DatedSIMD3F: Identifiable, Encodable, Decodable {
 }
 
 @Observable
-public class DatedSIMD3FList: Identifiable, Observable, Encodable, Decodable {
+public class DatedQList<T>: Identifiable, Observable, Encodable, Decodable
+where T: Encodable & Decodable {
     public let id = UUID()
-    public var simds: [DatedSIMD3F] = []
+    public var list: [DatedQuanta<T>] = []
 
     public init() {}
     
-    public func append(_ v: DatedSIMD3F) {
-        self.simds.append(v)
+    public func append(_ v: DatedQuanta<T>) {
+        self.list.append(v)
     }
     
     public func reset() {
-        self.simds.removeAll()
+        self.list.removeAll()
     }
     
     // Encoding/decoding
-    private enum CodingKeys: String, CodingKey { case simds }
+    private enum CodingKeys: String, CodingKey { case list }
     public required init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        simds = try container.decode([DatedSIMD3F].self, forKey: .simds)
+        list = try container.decode([DatedQuanta<T>].self, forKey: .list)
     }
     public func encode(to encoder: any Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
-        try? container.encode(simds, forKey: .simds)
+        try? container.encode(list, forKey: .list)
     }
 }
 
 @Observable
-public class DatedSIMD3FSegments: Encodable, Decodable, Identifiable, Observable {
-    public var latest: DatedSIMD3FList { get { segments.last! } }
+public class DatedQSegments<T>: Encodable, Decodable, Identifiable, Observable
+where T: Encodable & Decodable {
+    public var latest: DatedQList<T> { get { segments.last! } }
     
     public let id = UUID()
-    public var segments: [DatedSIMD3FList] = [DatedSIMD3FList()]
+    public var segments: [DatedQList<T>] = [DatedQList<T>()]
     
     public init() {}
     
     public func reset() {
         self.segments.removeAll()
-        self.segments.append(DatedSIMD3FList())
+        self.segments.append(DatedQList<T>())
     }
     
     public func startNewSegment() {
         // If the last one is empty might as well use it
-        if latest.simds.count > 0 {
-            self.segments.append(DatedSIMD3FList())
+        if latest.list.count > 0 {
+            self.segments.append(DatedQList<T>())
         }
     }
     
@@ -85,7 +94,7 @@ public class DatedSIMD3FSegments: Encodable, Decodable, Identifiable, Observable
     private enum CodingKeys: String, CodingKey { case segments }
     public required init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        segments = try container.decode([DatedSIMD3FList].self, forKey: .segments)
+        segments = try container.decode([DatedQList<T>].self, forKey: .segments)
     }
     public func encode(to encoder: any Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)

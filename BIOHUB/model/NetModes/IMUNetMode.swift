@@ -81,7 +81,7 @@ where BDiscovery.Listener == any PeripheralsDiscoveryListener<B> {
                     let readTime = Date.now
                     if biodyn.imuService.planarAccel == nil { return }
                     self.ensureStream(biodyn).addPlanar(
-                        DatedSIMD3F(readTime: readTime, read: biodyn.imuService.planarAccel!)
+                        DatedFloat3(readTime: readTime, read: biodyn.imuService.planarAccel!)
                     )
                 }
                 group.addTask {
@@ -89,7 +89,7 @@ where BDiscovery.Listener == any PeripheralsDiscoveryListener<B> {
                     let readTime = Date.now
                     if biodyn.imuService.gyroAccel == nil { return }
                     self.ensureStream(biodyn).addGyro(
-                        DatedSIMD3F(readTime: readTime, read: biodyn.imuService.gyroAccel!)
+                        DatedFloat3(readTime: readTime, read: biodyn.imuService.gyroAccel!)
                     )
                 }
                 group.addTask {
@@ -97,7 +97,7 @@ where BDiscovery.Listener == any PeripheralsDiscoveryListener<B> {
                     let readTime = Date.now
                     if biodyn.imuService.magnetometer == nil { return }
                     self.ensureStream(biodyn).addMag(
-                        DatedSIMD3F(readTime: readTime, read: biodyn.imuService.magnetometer!)
+                        DatedFloat3(readTime: readTime, read: biodyn.imuService.magnetometer!)
                     )
                 }
             }
