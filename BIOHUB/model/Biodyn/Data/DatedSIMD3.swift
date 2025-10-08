@@ -37,40 +37,26 @@ public struct DatedSIMD3F: Identifiable, Encodable, Decodable {
 public class DatedSIMD3FList: Identifiable, Observable, Encodable, Decodable {
     public let id = UUID()
     public var simds: [DatedSIMD3F] = []
-    public var startTime: Date?
-    public var endTime: Date?
 
     public init() {}
     
     public func append(_ v: DatedSIMD3F) {
         self.simds.append(v)
-        if endTime == nil || v.readTime > endTime! {
-            endTime = v.readTime
-        }
-        if startTime == nil || v.readTime < startTime! {
-            startTime = v.readTime
-        }
     }
     
     public func reset() {
         self.simds.removeAll()
-        startTime = nil
-        endTime = nil
     }
     
     // Encoding/decoding
-    private enum CodingKeys: String, CodingKey { case simds, startTime, endTime }
+    private enum CodingKeys: String, CodingKey { case simds }
     public required init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         simds = try container.decode([DatedSIMD3F].self, forKey: .simds)
-        startTime = try container.decode(Date.self, forKey: .startTime)
-        endTime = try container.decode(Date.self, forKey: .endTime)
     }
     public func encode(to encoder: any Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try? container.encode(simds, forKey: .simds)
-        try? container.encode(startTime, forKey: .startTime)
-        try? container.encode(endTime, forKey: .endTime)
     }
 }
 

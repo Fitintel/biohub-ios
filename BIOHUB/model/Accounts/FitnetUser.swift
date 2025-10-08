@@ -15,8 +15,13 @@ public struct FitnetUser: Encodable, Decodable {
     
     func uploadIMUData(_ data: Dictionary<String, IMUDataStream>) async throws {
         let uploadTime = Date.now
-        let encodeData = try Firestore.Encoder().encode(data)
-        try await Firestore.firestore().collection("UserIMU").document(uid).setData(encodeData)
+        let encodeData = try Firestore.Encoder().encode(IMURecord(data: data, time: uploadTime))
+        try await Firestore.firestore()
+            .collection("UserIMU")
+            .document(uid)
+            .collection("Sessions")
+            .document(uploadTime.ISO8601Format())
+            .setData(encodeData)
         log.info("[FitnetUser] Uploaded IMU data")
     }
 }

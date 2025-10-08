@@ -18,6 +18,7 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
     @Bindable var imuNet: IMUNetMode<B, BD>
     @State private var imuGraph: IMUReadingType = .planar
     @State private var isUploading: Bool = false
+    @State private var isUploaded: Bool = false
     
     var body: some View {
         VStack {
@@ -40,6 +41,7 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
                 HStack {
                     Button(action: {
                         imuNet.reset()
+                        isUploaded = false
                     }) {
                         Text("Clear Data")
                     }
@@ -51,14 +53,15 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
                             do {
                                 try await app.fitnetUser!.uploadIMUData(imuNet.collectedData())
                                 isUploading = false
+                                isUploaded = true
                             } catch {
                                 log.error("[IMUNetView] Failed to upload IMU data: \(error.localizedDescription)")
                             }
                         }
                     }) {
-                        Text("Save Session")
+                        Text(isUploaded ? "Data Uploaded" : "Save Session")
                     }
-                    .disabled(!app.isLoggedIn || imuNet.isPolling || isUploading)
+                    .disabled(!app.isLoggedIn || imuNet.isPolling || isUploading || isUploaded)
                     if (isUploading) {
                         ProgressView()
                     }
