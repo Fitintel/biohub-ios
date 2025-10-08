@@ -23,12 +23,12 @@ public struct DatedSIMD3F: Identifiable, Encodable, Decodable {
     private enum CodingKeys: String, CodingKey { case readTime, read }
     public init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        readTime = try container.decode(Date.self, forKey: .readTime)
+        readTime = Date(timeIntervalSince1970: try container.decode(Double.self, forKey: .readTime))
         read = try container.decode(SIMD3<Float>.self, forKey: .read)
     }
     public func encode(to encoder: any Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
-        try? container.encode(readTime, forKey: .readTime)
+        try? container.encode(readTime.timeIntervalSince1970, forKey: .readTime)
         try? container.encode(read, forKey: .read)
     }
 }
