@@ -10,19 +10,17 @@ import Foundation
 
 @Observable
 public class TestEMGService: PEMGService, TestWithDelays {
-    
-    
     public var emg: Float?
     
-    private var inst: Float?
-
+    public var inst: Float?
+    
     private var updateTask: Task<Void, Never>?
     private var rng = SystemRandomNumberGenerator()
 
     init() {
         updateTask = Task {
             while !Task.isCancelled {
-                let interval: Duration = .milliseconds(19)
+                let interval: Duration = .milliseconds(5)
                 self.simulate()
                 try? await Task.sleep(for: interval)
             }

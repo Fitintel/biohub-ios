@@ -10,9 +10,11 @@ import simd
 import Observation
 
 public typealias DatedFloat3 = DatedQuanta<SIMD3<Float>>
+public typealias DatedFloat3List = DatedQList<SIMD3<Float>>
 public typealias DatedFloat3Segments = DatedQSegments<SIMD3<Float>>
 
 public typealias DatedFloat = DatedQuanta<Float>
+public typealias DatedFloatList = DatedQList<Float>
 public typealias DatedFloatSegments = DatedQSegments<Float>
 
 public struct DatedQuanta<T>: Identifiable, Encodable, Decodable
@@ -46,7 +48,7 @@ where T: Encodable & Decodable {
     public let id = UUID()
     public var list: [DatedQuanta<T>] = []
 
-    public init() {}
+    public required init() {}
     
     public func append(_ v: DatedQuanta<T>) {
         self.list.append(v)
@@ -54,6 +56,16 @@ where T: Encodable & Decodable {
     
     public func reset() {
         self.list.removeAll()
+    }
+    
+    public static func interpolate(samples: [T], start: Date, end: Date) -> Self {
+        var l = Self()
+        for i in 0...samples.count {
+            let rt = Date(timeIntervalSince1970: (Double(i) / (end.timeIntervalSince1970 - start.timeIntervalSince1970) + start.timeIntervalSince1970))
+            l.append(DatedQuanta(readTime: rt,
+                                 read: samples[i]))
+        }
+        return l
     }
     
     // Encoding/decoding

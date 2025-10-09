@@ -16,6 +16,7 @@ public class Biodyn: PBiodyn {
     public typealias TSelfTest = SelfTestService
     public typealias TIMU = IMUService
     public typealias TEMG = EMGService
+    public typealias TDataFast = DataFastService
 
     private static let TAG = "Biodyn"
     
@@ -26,6 +27,7 @@ public class Biodyn: PBiodyn {
     public let selfTestService: SelfTestService
     public var imuService: IMUService
     public var emgService: EMGService
+    public var dfService: DataFastService
 
     // Connected peripheral
     let peripheral: CBPeripheral
@@ -52,7 +54,10 @@ public class Biodyn: PBiodyn {
         let emgService = EMGService(peripheral)
         self.emgService = emgService
         
-        self.allServices = [deviceInfoService, testService, selfTestService, imuService, emgService]
+        let dfService = DataFastService(peripheral)
+        self.dfService = dfService
+        
+        self.allServices = [dfService, deviceInfoService, testService, selfTestService, imuService, emgService]
         for s in self.allServices {
             self.serviceMap.updateValue(s, forKey: s.uuid)
             for c in s.characteristics {

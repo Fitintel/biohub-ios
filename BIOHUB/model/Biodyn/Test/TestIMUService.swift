@@ -15,9 +15,9 @@ public class TestIMUService: PIMUService, TestWithDelays {
     public var gyroAccel: SIMD3<Float>?
     public var magnetometer: SIMD3<Float>?
     
-    private var pi: SIMD3<Float>?
-    private var gi: SIMD3<Float>?
-    private var mi: SIMD3<Float>?
+    public var pi: SIMD3<Float>?
+    public var gi: SIMD3<Float>?
+    public var mi: SIMD3<Float>?
 
     private var updateTask: Task<Void, Never>?
     private var rng = SystemRandomNumberGenerator()
@@ -25,7 +25,7 @@ public class TestIMUService: PIMUService, TestWithDelays {
     init() {
         updateTask = Task {
             while !Task.isCancelled {
-                let interval: Duration = .milliseconds(19)
+                let interval: Duration = .milliseconds(6)
                 self.simulatePlanar()
                 self.simulateGyro()
                 self.simulateMag()

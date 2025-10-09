@@ -15,6 +15,7 @@ class TestBiodyn: PBiodyn {
     typealias TSelfTest = TestSelfTestService
     typealias TIMU = TestIMUService
     typealias TEMG = TestEMGService
+    typealias TDataFast = TestDataFastService
 
     var uuid: UUID = UUID()
     var deviceInfoService: TestDeviceInformationService
@@ -22,12 +23,16 @@ class TestBiodyn: PBiodyn {
     var selfTestService: TestSelfTestService
     var imuService: TestIMUService
     var emgService: TestEMGService
+    var dfService: TestDataFastService
 
     init(name: String, manuf: String, ver: String) {
         deviceInfoService = TestDeviceInformationService(name, manuf, ver)
         testService = TestTestService()
         selfTestService = TestSelfTestService()
-        imuService = TestIMUService()
-        emgService = TestEMGService()
+        let imus = TestIMUService()
+        imuService = imus
+        let emgs = TestEMGService()
+        emgService = emgs
+        dfService = TestDataFastService(emgs, imus)
     }
 }
