@@ -59,7 +59,7 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
                             }
                         }
                     }) {
-                        Text(isUploaded ? "Data Uploaded" : "Save Session")
+                        Text(isUploaded ? "Data Uploaded" : (app.isLoggedIn ? "Save Session" : "Log In to Save"))
                     }
                     .disabled(!app.isLoggedIn || imuNet.isPolling || isUploading || isUploaded)
                     if (isUploading) {

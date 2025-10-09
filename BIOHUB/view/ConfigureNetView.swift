@@ -24,6 +24,7 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
                     Text("Self Test").tag(NetMode.selfTest)
                     Text("Data Collection").tag(NetMode.dataCollection)
                     Text("IMU Readings").tag(NetMode.imu)
+                    Text("EMG Readings").tag(NetMode.emg)
                 }
                 Spacer()
             }.padding(.horizontal)
@@ -38,6 +39,9 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
                         break
                     case .imu:
                         app.net.path.append(NetViewRoute.imu)
+                        break
+                    case .emg:
+                        app.net.path.append(NetViewRoute.emg)
                         break
                     }
                 }) {

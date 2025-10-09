@@ -44,6 +44,7 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
                             case .selfTest: SelfTestNetView(app: app, netMode: SelfTestNetMode(app.fitnet))
                             case .dataCollection: DataCollectionNetView(app: app, netMode: DataCollectionNetMode(app.fitnet))
                             case .imu: IMUNetView(app: app, imuNet: IMUNetMode(app.fitnet))
+                            case .emg: EMGNetView(app: app, emgNet: EMGNetMode(app.fitnet))
                             }
                         }
                 }

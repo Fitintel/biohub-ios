@@ -13,6 +13,7 @@ public protocol PBiodyn: Observable, Identifiable {
     associatedtype TTest: PTestService
     associatedtype TSelfTest: PSelfTestService
     associatedtype TIMU: PIMUService
+    associatedtype TEMG: PEMGService
     
     // UUID of this device
     var uuid: UUID { get }
@@ -28,4 +29,7 @@ public protocol PBiodyn: Observable, Identifiable {
     
     // IMU service
     var imuService: TIMU { get }
+    
+    // EMG service
+    var emgService: TEMG { get }
 }

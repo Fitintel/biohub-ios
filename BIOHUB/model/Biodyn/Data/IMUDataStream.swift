@@ -10,12 +10,12 @@ import Foundation
 import simd
 
 @Observable
-public class IMUDataStream: Encodable, Decodable {
+public class IMUDataStream: Encodable, Decodable, Segmentable, DefaultInit {
     public var planar = DatedFloat3Segments()
     public var gyro = DatedFloat3Segments()
     public var magneto = DatedFloat3Segments()
     
-    public init() {}
+    public required init() {}
     
     public func addPlanar(_ v: DatedFloat3) {
         self.planar.latest.append(v)

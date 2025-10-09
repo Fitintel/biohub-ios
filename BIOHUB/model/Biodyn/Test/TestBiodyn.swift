@@ -14,17 +14,20 @@ class TestBiodyn: PBiodyn {
     typealias TDeviceInfo = TestDeviceInformationService
     typealias TSelfTest = TestSelfTestService
     typealias TIMU = TestIMUService
+    typealias TEMG = TestEMGService
 
     var uuid: UUID = UUID()
     var deviceInfoService: TestDeviceInformationService
     var testService: TestTestService
     var selfTestService: TestSelfTestService
     var imuService: TestIMUService
+    var emgService: TestEMGService
 
     init(name: String, manuf: String, ver: String) {
         deviceInfoService = TestDeviceInformationService(name, manuf, ver)
         testService = TestTestService()
         selfTestService = TestSelfTestService()
         imuService = TestIMUService()
+        emgService = TestEMGService()
     }
 }

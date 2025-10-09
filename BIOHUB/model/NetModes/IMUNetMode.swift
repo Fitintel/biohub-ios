@@ -9,71 +9,18 @@ import Observation
 import Foundation
 
 @Observable
-public class IMUNetMode<B: PBiodyn, BDiscovery: PeripheralsDiscovery<B>>
+public class IMUNetMode<B: PBiodyn, BDiscovery: PeripheralsDiscovery<B>> : PollingNetMode<B, BDiscovery,  IMUDataStream>
 where BDiscovery.Listener == any PeripheralsDiscoveryListener<B> {
-    public typealias PM = Fitnet<B, BDiscovery>
-    private let TAG = "IMUNetMode"
     
     public let maxPlanarAccel: Float = 5
     public let maxGyroAccel: Float = 5
     public let maxMagnetometer: Float = 5
     
-    public let fitnet: Fitnet<B, BDiscovery>
-    public var isPolling: Bool { get { return pollTask != nil } }
-    
-    private var dataMap = Dictionary<UUID, IMUDataStream>()
-    private var pollTask: Task<Void, Never>? = nil
-    
     init(_ fitnet: Fitnet<B, BDiscovery>) {
-        self.fitnet = fitnet
-        for biodyn in fitnet.biodyns {
-            dataMap.updateValue(IMUDataStream(), forKey: biodyn.uuid)
-        }
+        super.init(name: "IMUNetMode", fitnet: fitnet)
     }
     
-    public func dataFor(_ biodyn: B) -> IMUDataStream {
-        return self.ensureStream(biodyn)
-    }
-    
-    public func collectedData() -> Dictionary<String, IMUDataStream> {
-        var d = Dictionary<String, IMUDataStream>()
-        for kvp in dataMap {
-            guard let devName = fitnet.byUUID(kvp.key)?.deviceInfoService.systemIdStr else {
-                log.warning("[\(self.TAG)] Skipping unnamed biodyn \(kvp.key)")
-                continue
-            }
-            d.updateValue(kvp.value, forKey: "\(devName)")
-        }
-        return d
-    }
-    
-    public func reset() {
-        for biodyn in fitnet.biodyns {
-            self.ensureStream(biodyn).reset()
-        }
-    }
-    
-    public func startPolling() {
-        log.info("[\(self.TAG)] Starting polling")
-        self.pollTask = Task {
-            let interval: Duration = .milliseconds(20)
-            while !Task.isCancelled {
-                await readIMUAsync()
-                try? await Task.sleep(for: interval)
-            }
-            for biodyn in fitnet.biodyns {
-                self.ensureStream(biodyn).startNewSegment()
-            }
-        }
-    }
-    
-    public func stopPolling() {
-        log.info("[\(self.TAG)] Stopping polling")
-        self.pollTask?.cancel()
-        self.pollTask = nil
-    }
-    
-    private func readIMUAsync() async {
+    public override func readAsync() async {
         await withTaskGroup(of: Void.self) { group in
             for biodyn in fitnet.biodyns {
                 group.addTask {
@@ -103,13 +50,6 @@ where BDiscovery.Listener == any PeripheralsDiscoveryListener<B> {
             }
             await group.waitForAll()
         }
-    }
-    
-    private func ensureStream(_ biodyn: B) -> IMUDataStream {
-        if let s = dataMap[biodyn.uuid] { return s }
-        let s = IMUDataStream()
-        dataMap[biodyn.uuid] = s
-        return s
     }
     
 }
