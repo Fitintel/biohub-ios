@@ -8,21 +8,12 @@
 import Observation
 
 @Observable
-public class DataCollectionNetMode<B: PBiodyn, BDiscovery: PeripheralsDiscovery<B>>
+public class DataCollectionNetMode<B: PBiodyn, BDiscovery: PeripheralsDiscovery<B>> : PollingNetMode<B, BDiscovery, FullDataStream>
 where BDiscovery.Listener == any PeripheralsDiscoveryListener<B> {
     public typealias PM = Fitnet<B, BDiscovery>
 
-    public let fitnet: Fitnet<B, BDiscovery>
-    public var collectingData: Bool
-    
-    init(_ fitnet: Fitnet<B, BDiscovery>) {
-        self.fitnet = fitnet
-        self.collectingData = false
-    }
-    
-    public func startDataCollection() {
-        // TODO: Implement me
-        self.collectingData = true
+        init(_ fitnet: Fitnet<B, BDiscovery>) {
+        super.init(name: "Data Collection Net Mode", fitnet: fitnet)
     }
     
 }

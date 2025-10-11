@@ -11,20 +11,32 @@ struct DataCollectionNetView<B: PBiodyn, BD: PeripheralsDiscovery<B>>: View
 where BD.Listener == any PeripheralsDiscoveryListener<B> {
     
     @Bindable var app: AppState<B, BD>
-    @Bindable var netMode: DataCollectionNetMode<B, BD>
-    
+    @Bindable var dNet: DataCollectionNetMode<B, BD>
+    @State private var isUploading: Bool = false
+    @State private var isUploaded: Bool = false
+
     var body: some View {
         VStack {
-            Button(role: netMode.collectingData ? .destructive : nil , action: {
-                netMode.startDataCollection()
+            Button(role: dNet.isPolling ? .destructive : nil , action: {
+                dNet.isPolling ? dNet.stopPolling() : dNet.startPolling()
             }) {
-                Text(netMode.collectingData ? "Stop Data Collection" : "Start Data Collection")
+                Text(dNet.isPolling ? "Stop Data Collection" : "Start Data Collection")
             }
-            if netMode.collectingData {
+            Button(action: {
+                dNet.reset()
+                isUploaded = false
+            }) {
+                Text("Clear Data")
+            }
+            if dNet.isPolling {
                 Text("Collecting data...")
                 ProgressView()
             }
         }
         .navigationTitle("Net Data Collection")
+        .onDisappear {
+            dNet.stopPolling()
+            dNet.reset()
+        }
     }
 }
