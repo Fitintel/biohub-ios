@@ -47,7 +47,7 @@ public class TestDataFastService: PDataFastService, TestWithDelays {
     }
     
     public func readAsync() async {
-        try? await Task.sleep(nanoseconds: 100)
+        try? await Task.sleep(for: .milliseconds(5))
         self.syncWithInternal()
     }
     

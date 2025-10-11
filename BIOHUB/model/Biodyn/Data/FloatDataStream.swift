@@ -10,31 +10,35 @@ import Observation
 import Foundation
 
 @Observable
-public class EMGDataStream: Encodable, Decodable, Segmentable, DefaultInit {
-    public var emg = DatedFloatSegments()
+public class FloatDataStream: Encodable, Decodable, Segmentable, DefaultInit {
+    public var floats = DatedFloatSegments()
     
     public required init() {}
     
-    public func addEmg(_ value: DatedFloat) {
-        self.emg.latest.append(value)
+    public func add(_ value: DatedFloat) {
+        self.floats.latest.append(value)
+    }
+    
+    public func addAll(_ values: DatedFloatList) {
+        self.floats.latest.appendAll(values)
     }
     
     public func reset() {
-        self.emg.reset()
+        self.floats.reset()
     }
     
     public func startNewSegment() {
-        self.emg.startNewSegment()
+        self.floats.startNewSegment()
     }
     
     // Encoding/decoding
     private enum CodingKeys: String, CodingKey { case emg }
     public required init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        self.emg = try container.decode(DatedFloatSegments.self, forKey: .emg)
+        self.floats = try container.decode(DatedFloatSegments.self, forKey: .emg)
     }
     public func encode(to encoder: any Encoder) throws {
         var c = encoder.container(keyedBy: CodingKeys.self)
-        try c.encode(self.emg, forKey: .emg)
+        try c.encode(self.floats, forKey: .emg)
     }
 }

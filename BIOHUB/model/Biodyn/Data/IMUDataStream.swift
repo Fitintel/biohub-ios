@@ -20,14 +20,24 @@ public class IMUDataStream: Encodable, Decodable, Segmentable, DefaultInit {
     public func addPlanar(_ v: DatedFloat3) {
         self.planar.latest.append(v)
     }
+    public func addAllPlanar(_ v: DatedFloat3List) {
+        self.planar.latest.appendAll(v)
+    }
     
     public func addGyro(_ v: DatedFloat3) {
         self.gyro.latest.append(v)
+    }
+    public func addAllGyro(_ v: DatedFloat3List) {
+        self.gyro.latest.appendAll(v)
     }
     
     public func addMag(_ v: DatedFloat3) {
         self.magneto.latest.append(v)
     }
+    public func addAllMag(_ v: DatedFloat3List) {
+        self.magneto.latest.appendAll(v)
+    }
+
     
     public func reset() {
         self.planar.reset()

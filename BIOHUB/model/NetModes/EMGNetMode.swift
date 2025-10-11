@@ -9,7 +9,7 @@ import Observation
 import Foundation
 
 @Observable
-public class EMGNetMode<B: PBiodyn, BDiscovery: PeripheralsDiscovery<B>> : PollingNetMode<B, BDiscovery,  EMGDataStream>
+public class EMGNetMode<B: PBiodyn, BDiscovery: PeripheralsDiscovery<B>> : PollingNetMode<B, BDiscovery,  FloatDataStream>
 where BDiscovery.Listener == any PeripheralsDiscoveryListener<B> {
     
     public let maxEMG: Float = 5
@@ -25,7 +25,7 @@ where BDiscovery.Listener == any PeripheralsDiscoveryListener<B> {
                     await biodyn.emgService.readEMGAsync()
                     let readTime = Date.now
                     if biodyn.emgService.emg == nil { return }
-                    self.ensureStream(biodyn).addEmg(
+                    self.ensureStream(biodyn).add(
                         DatedFloat(readTime: readTime, read: biodyn.emgService.emg!)
                     )
                 }

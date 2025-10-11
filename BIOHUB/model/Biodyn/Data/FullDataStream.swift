@@ -12,7 +12,7 @@ import simd
 @Observable
 public class FullDataStream: Encodable, Decodable, Segmentable, DefaultInit {
     public var imu = IMUDataStream()
-    public var emg = EMGDataStream()
+    public var emg = FloatDataStream()
     
     public required init() {}
     

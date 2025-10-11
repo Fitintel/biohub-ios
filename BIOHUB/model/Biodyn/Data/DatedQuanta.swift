@@ -54,12 +54,22 @@ where T: Encodable & Decodable {
         self.list.append(v)
     }
     
+    public func appendAll(_ v : DatedQList<T>) {
+        // Time-aware
+        let latest = self.list.last?.readTime ?? Date(timeIntervalSince1970: 0)
+        for item in v.list {
+            if item.readTime > latest {
+                self.append(item)
+            }
+        }
+    }
+    
     public func reset() {
         self.list.removeAll()
     }
     
     public static func interpolate(samples: [T], start: Date, end: Date) -> Self {
-        var l = Self()
+        let l = Self()
         for i in 0...samples.count {
             let rt = Date(timeIntervalSince1970: (Double(i) / (end.timeIntervalSince1970 - start.timeIntervalSince1970) + start.timeIntervalSince1970))
             l.append(DatedQuanta(readTime: rt,
