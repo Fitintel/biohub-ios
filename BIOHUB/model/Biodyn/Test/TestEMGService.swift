@@ -16,6 +16,12 @@ public class TestEMGService: PEMGService, TestWithDelays {
     
     private var updateTask: Task<Void, Never>?
     private var rng = SystemRandomNumberGenerator()
+    
+    private let circBufLen = 500
+    private var historyWritePtr: Int = 0
+    private var history: [DatedFloat] = []
+    private var historyStart: Date = Date.now
+    private var historyEnd: Date = Date.now
 
     init() {
         updateTask = Task {
