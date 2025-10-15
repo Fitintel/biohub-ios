@@ -107,7 +107,7 @@ where T: Encodable & Decodable {
     
     public func startNewSegment() {
         // If the last one is empty might as well use it
-        if latest.list.count > 0 {
+        if segments.count > 0 && latest.list.count > 0 {
             self.segments.append(DatedQList<T>())
         }
     }

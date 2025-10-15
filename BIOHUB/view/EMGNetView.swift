@@ -50,9 +50,11 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
             }
         }
         .navigationTitle("EMG Reading")
+        .onAppear() {
+            emgNet.reset()
+        }
         .onDisappear {
             emgNet.stopPolling()
-            emgNet.reset()
         }
     }
 }

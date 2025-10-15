@@ -33,6 +33,11 @@ public class SelfTestService: FitnetBLEService, PSelfTestService {
                    characteristics: [state, msg])
     }
     
+    public func read() {
+        stateChar.readValue()
+        errMsgChar.readValue()
+    }
+    
     public func runSelfTest() {
         if selfTestState == SelfTestState.running {
             log.warning("[\(self.name)] Tried to start already-running self-test")

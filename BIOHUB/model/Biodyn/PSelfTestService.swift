@@ -21,4 +21,5 @@ public protocol PSelfTestService: Observable {
     var selfTestError: String? { get }
     
     func runSelfTest()
+    func read()
 }

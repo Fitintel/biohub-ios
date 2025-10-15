@@ -88,9 +88,11 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
                 }
             }
             .navigationTitle("IMU Reading")
+            .onAppear() {
+                imuNet.reset()
+            }
             .onDisappear {
                 imuNet.stopPolling()
-                imuNet.reset()
             }
         }
         

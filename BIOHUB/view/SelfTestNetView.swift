@@ -62,5 +62,11 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
             }.listStyle(.plain)
         }
         .navigationTitle("Net Self-Test")
+        .onAppear {
+            netMode.start()
+        }
+        .onDisappear {
+            netMode.close()
+        }
     }
 }

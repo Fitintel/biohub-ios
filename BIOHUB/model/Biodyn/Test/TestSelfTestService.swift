@@ -13,24 +13,34 @@ class TestSelfTestService: PSelfTestService, TestWithDelays {
     var selfTestState: SelfTestState?
     var selfTestError: String?
     
+    var sti: SelfTestState = SelfTestState.notStarted
+    var ste: String = ""
+    
     init() {
         doQuickly {
             self.selfTestState = SelfTestState.notStarted
         }
     }
     
+    public func read() {
+        doImmediately {
+            self.selfTestState = self.sti
+            self.selfTestError = self.ste
+        }
+    }
+    
     func runSelfTest() {
         doImmediately {
-            self.selfTestState = SelfTestState.notStarted
+            self.sti = SelfTestState.notStarted
         }
         doSoon {
-            self.selfTestState = SelfTestState.running
+            self.sti = SelfTestState.running
         }
         doEventually {
-            self.selfTestState = [SelfTestState.completedOk, SelfTestState.completedOk, SelfTestState.completedOk,
+            self.sti = [SelfTestState.completedOk, SelfTestState.completedOk, SelfTestState.completedOk,
                                   SelfTestState.completedOk, SelfTestState.completedOk, SelfTestState.completedWithError, SelfTestState.completedOk, SelfTestState.completedWithError, SelfTestState.completedOk, SelfTestState.invalid].randomElement()!
-            if self.selfTestState == SelfTestState.completedWithError {
-                self.selfTestError = ["LED module failed", "IMU module failed", "EMG module failed", "Fast Data module failed", "Time Sync module failed", "Temp Module Failed"].randomElement()!
+            if self.sti == SelfTestState.completedWithError {
+                self.ste = ["LED module failed", "IMU module failed", "EMG module failed", "Fast Data module failed", "Time Sync module failed", "Temp Module Failed"].randomElement()!
             }
         }
     }
