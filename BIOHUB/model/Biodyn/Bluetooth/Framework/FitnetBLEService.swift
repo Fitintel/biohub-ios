@@ -71,9 +71,11 @@ public class FitnetBLEService: ObservableObject {
         if self.characteristicsMap[char.uuid] != nil {
             let c = characteristicsMap[char.uuid]!
             c.loaded = true
+            c.cbChar = char
             c.onLoaded()
             return true
         }
+        log.error("[\(self.name)] Could not find \(char.uuid) in owned chars: \(self.characteristicsMap.keys)")
         return false
     }
 

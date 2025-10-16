@@ -11,7 +11,7 @@ import Observation
 @Observable
 public class IMUService: FitnetBLEService, PIMUService {
     
-    private static let SERVICE_UUID = CBUUID(data: Data([UInt8]([0xC3, 0x32])))
+    private static let SERVICE_UUID = CBUUID(data: Data([UInt8]([0x3C, 0x32])))
     private static let PLANAR_ACC_UUID = CBUUID(data: Data([UInt8]([0xC3, 0x50])))
     private static let GYRO_ACC_UUID = CBUUID(data: Data([UInt8]([0xC3, 0x51])))
     private static let MAGNETO_UUID = CBUUID(data: Data([UInt8]([0xC3, 0x52])))

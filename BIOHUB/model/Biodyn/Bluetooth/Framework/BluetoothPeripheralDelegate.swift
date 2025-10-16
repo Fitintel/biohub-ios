@@ -23,9 +23,7 @@ class BluetoothPeripheralDelegate: NSObject, ObservableObject, CBPeripheralDeleg
     
     // Call after discovering services
     func discoverCharacteristics(peripheral: CBPeripheral) {
-        guard let services = peripheral.services else {
-            return
-        }
+        guard let services = peripheral.services else { return }
         for service in services {
             peripheral.discoverCharacteristics(nil, for: service)
         }

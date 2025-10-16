@@ -20,7 +20,7 @@ public class Biodyn: PBiodyn {
 
     private static let TAG = "Biodyn"
     
-    public let uuid: UUID = UUID()
+    public let uuid: UUID
     
     public let deviceInfoService: DeviceInformationService
     public let testService: TestService
@@ -38,6 +38,7 @@ public class Biodyn: PBiodyn {
     
     init(_ peripheral: CBPeripheral) {
         self.peripheral = peripheral
+        self.uuid = peripheral.identifier
         
         let deviceInfoService = DeviceInformationService(peripheral)
         self.deviceInfoService = deviceInfoService
@@ -68,7 +69,7 @@ public class Biodyn: PBiodyn {
     
     public func loadService(_ service: CBService) {
         guard let s = serviceMap[service.uuid] else {
-            log.error("[\(Self.TAG)] Tried to load non-biodyn service \(service.uuid)")
+            log.error("[\(Self.TAG)] Tried to load non-biodyn service \(service.uuid): valid are \(self.serviceMap.keys)")
             return
         }
         if !s.loadService(service) {
@@ -85,10 +86,11 @@ public class Biodyn: PBiodyn {
         if !s.loadCharacteristic(char) {
             log.error("[\(Self.TAG)] Service \(forService.uuid) failed to load characteristic \(char.uuid)")
         }
+        charServMap.updateValue(serviceMap[forService.uuid]!, forKey: char.uuid)
     }
     
     public func notifyRead(_ forCharacteristic: CBCharacteristic) {
-        guard let s = serviceMap[forCharacteristic.uuid] else {
+        guard let s = charServMap[forCharacteristic.uuid] else {
             log.error("[\(Self.TAG)] Could not find characteristic \(forCharacteristic.uuid)")
             return
         }

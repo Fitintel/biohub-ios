@@ -33,12 +33,12 @@ class TestSelfTestService: PSelfTestService, TestWithDelays {
         doImmediately {
             self.sti = SelfTestState.notStarted
         }
-        doSoon {
+        doImmediately {
             self.sti = SelfTestState.running
         }
         doEventually {
             self.sti = [SelfTestState.completedOk, SelfTestState.completedOk, SelfTestState.completedOk,
-                                  SelfTestState.completedOk, SelfTestState.completedOk, SelfTestState.completedWithError, SelfTestState.completedOk, SelfTestState.completedWithError, SelfTestState.completedOk, SelfTestState.invalid].randomElement()!
+                        SelfTestState.completedOk, SelfTestState.completedOk, SelfTestState.completedWithError, SelfTestState.completedOk, SelfTestState.completedWithError, SelfTestState.completedOk, SelfTestState.invalid].randomElement()!
             if self.sti == SelfTestState.completedWithError {
                 self.ste = ["LED module failed", "IMU module failed", "EMG module failed", "Fast Data module failed", "Time Sync module failed", "Temp Module Failed"].randomElement()!
             }

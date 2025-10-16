@@ -20,6 +20,6 @@ public protocol PSelfTestService: Observable {
     var selfTestState: SelfTestState? { get }
     var selfTestError: String? { get }
     
-    func runSelfTest()
+    func runSelfTest() 
     func read()
 }

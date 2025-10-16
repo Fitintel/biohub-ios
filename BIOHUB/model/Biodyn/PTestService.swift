@@ -9,6 +9,6 @@ import Observation
 
 public protocol PTestService: Observable {
     var ledValue: Bool? { get }
-    func writeLEDValue(value: Bool)
+    func writeLEDValue(value: Bool) 
     func readLEDValue()
 }

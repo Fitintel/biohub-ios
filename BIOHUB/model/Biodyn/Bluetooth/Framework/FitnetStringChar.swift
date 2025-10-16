@@ -16,6 +16,7 @@ public class FitnetStringChar: FitnetBLEChar {
     
     public override func onRead(_ data: Data) {
         self.value = String(data: data, encoding: .ascii)
+        log.info("[\(self.name)] Read \(self.value ?? "nil")")
     }
     
     public override func writeValue(data: Data, type: CBCharacteristicWriteType) {

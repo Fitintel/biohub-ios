@@ -41,6 +41,9 @@ where BDiscovery.Listener == any PeripheralsDiscoveryListener<B> {
     
     // Callback for when a BIODYN is discovered
     public func onConnected(_ p: B) {
+        self.biodyns.removeAll(where: { b in
+            b.uuid == p.uuid
+        })
         self.biodyns.append(p)
         self.biodynMap.updateValue(p, forKey: p.uuid)
     }

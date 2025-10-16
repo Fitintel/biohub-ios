@@ -43,8 +43,8 @@ enum NetViewRoute: Hashable { case create, configure, selfTest, dataCollection, 
 struct BIOHUBApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
     
-    //  @State private var app = AppState(deviceDiscovery: BluetoothPeripheralsDiscovery.shared)
-    @State private var app = AppState(deviceDiscovery: TestPeripheralsDiscovery())
+    @State private var app = AppState(deviceDiscovery: BluetoothPeripheralsDiscovery.shared)
+//    @State private var app = AppState(deviceDiscovery: TestPeripheralsDiscovery())
     
     var body: some Scene {
         WindowGroup {

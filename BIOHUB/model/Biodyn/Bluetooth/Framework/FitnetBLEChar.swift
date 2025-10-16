@@ -16,10 +16,12 @@ public class FitnetBLEChar: Observable {
     var cbChar: CBCharacteristic?
     var peripheral: CBPeripheral
     
+    private enum TimeoutError: Error { case timeout }
+    
     // To catch when readValue is overwritten to see if readValueAsync should run
     private var didRequestRead: Bool = false
     
-    private var readCont: CheckedContinuation<Data, Never>?
+    private var readCont: CheckedContinuation<Data, Error>?
     
     init(_ peripheral: CBPeripheral, _ name: String, _ uuid: CBUUID) {
         self.name = name
@@ -40,22 +42,23 @@ public class FitnetBLEChar: Observable {
     // Callback with data read from this characteristic
     final func onReadInternal(_ data: Data) {
         onRead(data)
-        if readCont != nil {
-            readCont?.resume(returning: data)
+        if let cont = readCont {
+            readCont = nil
+            cont.resume(returning: data)
         }
     }
     
     func writeValue(data: Data, type: CBCharacteristicWriteType) {
-        if !self.loaded {
+        guard self.loaded else {
             log.error("[\(self.name)] Attempted to write value of unloaded characteristic")
             return
         }
-        peripheral.writeValue(data, for: self.cbChar!, type: .withResponse)
+        peripheral.writeValue(data, for: self.cbChar!, type: type)
     }
     
     func readValue() {
         didRequestRead = false
-        if !self.loaded {
+        guard self.loaded else {
             log.error("[\(self.name)] Attempted to read value of unloaded characteristic")
             return
         }
@@ -65,27 +68,33 @@ public class FitnetBLEChar: Observable {
     
     // Waits for read value
     func readValueAsync(timeout: Duration) async {
+        guard self.loaded else {
+            log.error("[\(self.name)] Attempted to read value of unloaded characteristic")
+            return
+        }
+        precondition(readCont == nil, "[\(name)] Concurrent read/write async calls are not supported")
+
+        readValue()
+        
+        // Start a cancelable timeout that races the read
+        let timeoutTask = Task { @MainActor [weak self] in
+            try? await Task.sleep(for: timeout)
+            guard let self = self else { return }
+            if let cont = self.readCont {
+                self.readCont = nil
+                cont.resume(throwing: TimeoutError.timeout)
+            }
+        }
+        defer { timeoutTask.cancel() }
+
         do {
-            try await withThrowingTaskGroup(of: Void.self) { group in
-                group.addTask {
-                    self.readValue()
-                    if !self.didRequestRead { return }
-                    let _ = await withCheckedContinuation { cont in
-                        self.readCont = cont
-                    }
-                }
-                
-                group.addTask {
-                    try await Task.sleep(for: timeout)
-                    return
-                }
-                
-                let _ = try await group.next()!
-                group.cancelAll()
+            let _ = try await withCheckedThrowingContinuation { (cont: CheckedContinuation<Data, Error>) in
+                self.readCont = cont
             }
         }
         catch {
-            log.error("[\(self.name)] Error in readValueAsync: \(error.localizedDescription)")
+            log.error("[\(self.name)] Failed to read async: \(error.localizedDescription)")
         }
+        
     }
 }

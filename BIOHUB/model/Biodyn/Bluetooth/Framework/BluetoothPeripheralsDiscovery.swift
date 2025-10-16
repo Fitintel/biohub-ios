@@ -22,8 +22,9 @@ public class BluetoothPeripheralsDiscovery: NSObject, ObservableObject, CBCentra
     // Core Bluetooth Central Manager
     private var centralManager: CBCentralManager!
     // Connected peripherals
-    private var connectedPeripherals = Dictionary<CBPeripheral, Biodyn>()
-    private var peripheralDelegates = Dictionary<CBPeripheral, BluetoothPeripheralDelegate>()
+    private var uuidPeripherals = Dictionary<UUID, CBPeripheral>()
+    private var connectedPeripherals = Dictionary<UUID, Biodyn>()
+    private var peripheralDelegates = Dictionary<UUID, BluetoothPeripheralDelegate>()
     
     public var isDiscoverySupported: Bool {
         get {
@@ -66,15 +67,15 @@ public class BluetoothPeripheralsDiscovery: NSObject, ObservableObject, CBCentra
     }
     
     public func disconnect(_ p: Biodyn) {
-        var key: CBPeripheral?
+        var key: UUID?
         self.connectedPeripherals.forEach({
-            peripheral, biodyn in
-            if biodyn.uuid == p.uuid {
-                key = peripheral
+            uuid, biodyn in
+            if biodyn.uuid == uuid {
+                key = uuid
             }
         })
         if key != nil {
-            self.centralManager.cancelPeripheralConnection(key!)
+            self.centralManager.cancelPeripheralConnection(self.uuidPeripherals[key!]!)
             // Remove immediately
             self.connectedPeripherals.removeValue(forKey: key!)
             self.peripheralDelegates.removeValue(forKey: key!)
@@ -139,7 +140,8 @@ public class BluetoothPeripheralsDiscovery: NSObject, ObservableObject, CBCentra
             log.info("[\(Self.TAG)] Found BIODYN-100")
             centralManager.connect(peripheral) // Connect
             let biodyn = Biodyn(peripheral) // Construct
-            self.connectedPeripherals.updateValue(biodyn, forKey: peripheral) // Map & store locally
+            self.connectedPeripherals.updateValue(biodyn, forKey: peripheral.identifier) // Map & store locally
+
             self.notifyAdded(b: biodyn) // Notify listeners
         }
     }
@@ -148,10 +150,11 @@ public class BluetoothPeripheralsDiscovery: NSObject, ObservableObject, CBCentra
     public func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
         // Successfully connected. Store reference to peripheral if not already done.
         log.debug("[\(Self.TAG)] Connected to peripheral!")
-        peripheralDelegates.updateValue(BluetoothPeripheralDelegate(peripheral: peripheral, fitnetServices: self.connectedPeripherals[peripheral]!),
-                                        forKey: peripheral)
+        uuidPeripherals.updateValue(peripheral, forKey: peripheral.identifier)
+        peripheralDelegates.updateValue(BluetoothPeripheralDelegate(peripheral: peripheral, fitnetServices: self.connectedPeripherals[peripheral.identifier]!),
+                                        forKey: peripheral.identifier)
         
-        peripheral.delegate = self.peripheralDelegates[peripheral]!
+        peripheral.delegate = self.peripheralDelegates[peripheral.identifier]!
         peripheral.discoverServices(nil)
         
         self.isInitialized = true
@@ -160,8 +163,23 @@ public class BluetoothPeripheralsDiscovery: NSObject, ObservableObject, CBCentra
     // Callback when peripheral is disconnected
     public func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: (any Error)?) {
         log.debug("[\(Self.TAG)] Disconnected from peripheral.")
-        guard let biodyn = self.connectedPeripherals.removeValue(forKey: peripheral) else { return }
-        self.peripheralDelegates.removeValue(forKey: peripheral)
+        
+        var toRemove = [peripheral.identifier]
+        self.uuidPeripherals.forEach({ k,v in
+            if v.state != .connected {
+                toRemove.append(k)
+            }
+        })
+        toRemove.forEach({ uuid in
+            self.removeByUUID(uuid)
+        })
+    }
+    
+
+    private func removeByUUID(_ uuid: UUID) {
+        guard let biodyn = self.connectedPeripherals.removeValue(forKey: uuid) else { return }
+        self.peripheralDelegates.removeValue(forKey: uuid)
+        self.uuidPeripherals.removeValue(forKey: uuid)
         self.notifyRemoved(b: biodyn)
     }
     

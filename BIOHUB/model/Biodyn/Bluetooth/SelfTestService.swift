@@ -29,7 +29,7 @@ public class SelfTestService: FitnetBLEService, PSelfTestService {
         
         super.init(peripheral,
                    name: "Self Test Service",
-                   uuid: CBUUID(data: Data([UInt8]([0xA9, 0x12].reversed()))),
+                   uuid: Self.SERVICE_UUID,
                    characteristics: [state, msg])
     }
     
@@ -67,6 +67,10 @@ public class SelfTestService: FitnetBLEService, PSelfTestService {
         }
         
         override func onRead(_ data: Data) {
+            if data.count != 4 {
+                log.error("[\(self.name)] Failed to read state: len \(data.count)")
+                return
+            }
             let intData = data.withUnsafeBytes({ ptr in
                 return ptr.load(as: UInt32.self)
             })
