@@ -19,6 +19,8 @@ public class Biodyn: PBiodyn {
     public typealias TDataFast = DataFastService
 
     private static let TAG = "Biodyn"
+    public static let READ_AVG_KEEPS: Int = 50
+    private var readAvgPtr: Int = 0
     
     public let uuid: UUID
     
@@ -28,6 +30,7 @@ public class Biodyn: PBiodyn {
     public var imuService: IMUService
     public var emgService: EMGService
     public var dfService: DataFastService
+    public var avgReadDelay: Double = 0
 
     // Connected peripheral
     let peripheral: CBPeripheral
@@ -35,6 +38,7 @@ public class Biodyn: PBiodyn {
     let allServices: [FitnetBLEService]
     var serviceMap = Dictionary<CBUUID, FitnetBLEService>();
     var charServMap = Dictionary<CBUUID, FitnetBLEService>();
+    var readDelays: [Double] = Array(repeating: 0, count: READ_AVG_KEEPS)
     
     init(_ peripheral: CBPeripheral) {
         self.peripheral = peripheral
@@ -96,6 +100,23 @@ public class Biodyn: PBiodyn {
         }
         if !s.notifyRead(forCharacteristic) {
             log.error("[\(Self.TAG)] Characteristic read \(forCharacteristic.uuid) in \(s.name) failed")
+            return
+        }
+        let delay = s.characteristicsMap[forCharacteristic.uuid]!.readTime
+        readDelays[readAvgPtr] = delay
+        readAvgPtr = (readAvgPtr + 1) % Self.READ_AVG_KEEPS
+        let hasValue = readDelays.count(where: { x in x != 0})
+        avgReadDelay = readDelays.reduce(0, { a,b in
+            if a == 0 {
+                return b
+            } else if b == 0 {
+                return a
+            } else {
+                return a + b
+            }
+        })
+        if hasValue != 0 {
+            avgReadDelay /= Double(hasValue)
         }
     }
     

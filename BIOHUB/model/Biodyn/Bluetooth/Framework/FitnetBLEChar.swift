@@ -15,6 +15,7 @@ public class FitnetBLEChar: Observable {
     var loaded: Bool
     var cbChar: CBCharacteristic?
     var peripheral: CBPeripheral
+    public private(set)var readTime: TimeInterval = 0
     
     private enum TimeoutError: Error { case timeout }
     
@@ -22,6 +23,7 @@ public class FitnetBLEChar: Observable {
     private var didRequestRead: Bool = false
     
     private var readCont: CheckedContinuation<Data, Error>?
+    private var startRead: Date = Date.now
     
     init(_ peripheral: CBPeripheral, _ name: String, _ uuid: CBUUID) {
         self.name = name
@@ -41,6 +43,7 @@ public class FitnetBLEChar: Observable {
     
     // Callback with data read from this characteristic
     final func onReadInternal(_ data: Data) {
+        readTime = Date.now.timeIntervalSince(startRead)
         onRead(data)
         if let cont = readCont {
             readCont = nil
@@ -62,6 +65,7 @@ public class FitnetBLEChar: Observable {
             log.error("[\(self.name)] Attempted to read value of unloaded characteristic")
             return
         }
+        startRead = Date.now
         didRequestRead = true
         peripheral.readValue(for: self.cbChar!)
     }

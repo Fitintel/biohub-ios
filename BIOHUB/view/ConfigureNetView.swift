@@ -73,7 +73,7 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
                         HStack {
                             Text("-->").font(.system(size: 10))
                             Spacer()
-                            Text("Hardware \(item.deviceInfoService.harwareRevStr ?? "") by \(item.deviceInfoService.manufNameStr ?? "") [Model \(item.deviceInfoService.modelNumStr ?? ""), Serial \(item.deviceInfoService.serialNumStr ?? "")]")
+                            Text("Hardware \(item.deviceInfoService.harwareRevStr ?? "") by \(item.deviceInfoService.manufNameStr ?? "") [Model \(item.deviceInfoService.modelNumStr ?? ""), Serial \(item.deviceInfoService.serialNumStr ?? "")] Avg read \(UInt32(item.avgReadDelay * 1000))ms")
                                 .font(.system(size: 10))
                         }
                     }

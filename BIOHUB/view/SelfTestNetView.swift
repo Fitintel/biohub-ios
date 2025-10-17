@@ -18,7 +18,7 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
             List (app.fitnet.biodyns, id: \.uuid.uuidString) { item in
                 VStack {
                     HStack {
-                        Text("BIODYN \(item.deviceInfoService.systemIdStr ?? "???") \(item.deviceInfoService.firmwareRevStr ?? "???")")
+                        Text("BIODYN \(item.deviceInfoService.systemIdStr ?? "?") \(item.deviceInfoService.firmwareRevStr ?? "?") Avg read \(UInt32(item.avgReadDelay * 1000))ms")
                         Spacer()
                         switch item.selfTestService.selfTestState {
                         case .completedWithError:

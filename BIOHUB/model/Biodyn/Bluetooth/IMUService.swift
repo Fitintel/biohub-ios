@@ -15,7 +15,7 @@ public class IMUService: FitnetBLEService, PIMUService {
     private static let PLANAR_ACC_UUID = CBUUID(data: Data([UInt8]([0xC3, 0x50])))
     private static let GYRO_ACC_UUID = CBUUID(data: Data([UInt8]([0xC3, 0x51])))
     private static let MAGNETO_UUID = CBUUID(data: Data([UInt8]([0xC3, 0x52])))
-    private static let ASYNC_READ_TIMEOUT: Duration = .milliseconds(100)
+    private static let ASYNC_READ_TIMEOUT: Duration = .milliseconds(500)
     
     public var planarAccel: SIMD3<Float>? { get { planarChar.value } }
     public var gyroAccel: SIMD3<Float>? { get { gyroChar.value } }

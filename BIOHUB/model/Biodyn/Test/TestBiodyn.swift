@@ -10,6 +10,7 @@ import Foundation
 
 @Observable
 class TestBiodyn: PBiodyn {
+    
     typealias TTest = TestTestService
     typealias TDeviceInfo = TestDeviceInformationService
     typealias TSelfTest = TestSelfTestService
@@ -24,6 +25,7 @@ class TestBiodyn: PBiodyn {
     var imuService: TestIMUService
     var emgService: TestEMGService
     var dfService: TestDataFastService
+    var avgReadDelay: Double = 0
 
     init(name: String, manuf: String, ver: String) {
         deviceInfoService = TestDeviceInformationService(name, manuf, ver)

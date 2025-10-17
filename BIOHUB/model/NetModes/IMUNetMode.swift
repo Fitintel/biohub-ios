@@ -12,9 +12,10 @@ import Foundation
 public class IMUNetMode<B: PBiodyn, BDiscovery: PeripheralsDiscovery<B>> : PollingNetMode<B, BDiscovery,  IMUDataStream>
 where BDiscovery.Listener == any PeripheralsDiscoveryListener<B> {
     
-    public let maxPlanarAccel: Float = 5
+    public let maxPlanarAccel: Float = 20
     public let maxGyroAccel: Float = 5
     public let maxMagnetometer: Float = 5
+    public let avgReadDelay: Double = 0
     
     init(_ fitnet: Fitnet<B, BDiscovery>) {
         super.init(name: "IMUNetMode", fitnet: fitnet)

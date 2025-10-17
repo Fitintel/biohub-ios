@@ -14,11 +14,11 @@ class BluetoothPeripheralDelegate: NSObject, ObservableObject, CBPeripheralDeleg
     static let TAG = "Bluetooth Peripheral Delegate"
     
     private let peripheral: CBPeripheral
-    private let fitnetServices: Biodyn
+    private let biodyn: Biodyn
     
     init(peripheral: CBPeripheral, fitnetServices: Biodyn) {
         self.peripheral = peripheral
-        self.fitnetServices = fitnetServices
+        self.biodyn = fitnetServices
     }
     
     // Call after discovering services
@@ -38,7 +38,7 @@ class BluetoothPeripheralDelegate: NSObject, ObservableObject, CBPeripheralDeleg
         discoverCharacteristics(peripheral: peripheral)
         
         for service in services {
-            fitnetServices.loadService(service)
+            biodyn.loadService(service)
         }
     }
     
@@ -53,13 +53,13 @@ class BluetoothPeripheralDelegate: NSObject, ObservableObject, CBPeripheralDeleg
         log.debug("[\(Self.TAG)] Discovered characteristics \(characteristics)")
         
         for char in characteristics {
-            fitnetServices.loadCharacteristic(service, char)
+            biodyn.loadCharacteristic(service, char)
         }
     }
     
     // Called when a characteristic has been read
     func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
-        fitnetServices.notifyRead(characteristic)
+        biodyn.notifyRead(characteristic)
     }
     
 }

@@ -59,7 +59,7 @@ where BDiscovery.Listener == any PeripheralsDiscoveryListener<B>,
     public func startPolling() {
         log.info("[\(self.tag)] Starting polling")
         self.pollTask = Task {
-            let interval: Duration = .milliseconds(20)
+            let interval: Duration = .milliseconds(5)
             while !Task.isCancelled {
                 await readAsync()
                 try? await Task.sleep(for: interval)
