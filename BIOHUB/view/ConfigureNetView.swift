@@ -65,7 +65,18 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
             Text("Devices in Net").multilineTextAlignment(.center)
             List {
                 ForEach(app.fitnet.biodyns, id: \.uuid.uuidString) { item in
-                    Text("BIODYN \(item.deviceInfoService.systemIdStr ?? "???") \(item.deviceInfoService.firmwareRevStr ?? "???")")
+                    VStack {
+                        HStack {
+                            Text("BIODYN \(item.deviceInfoService.systemIdStr ?? "?") \(item.deviceInfoService.firmwareRevStr ?? "")")
+                            Spacer()
+                        }
+                        HStack {
+                            Text("-->").font(.system(size: 10))
+                            Spacer()
+                            Text("Hardware \(item.deviceInfoService.harwareRevStr ?? "") by \(item.deviceInfoService.manufNameStr ?? "") [Model \(item.deviceInfoService.modelNumStr ?? ""), Serial \(item.deviceInfoService.serialNumStr ?? "")]")
+                                .font(.system(size: 10))
+                        }
+                    }
                 }
             }.listStyle(.plain)
         }
