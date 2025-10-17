@@ -11,4 +11,5 @@ public protocol PTestService: Observable {
     var ledValue: Bool? { get }
     func writeLEDValue(value: Bool) 
     func readLEDValue()
+    func readLEDValueAsync() async
 }

@@ -43,6 +43,7 @@ public class SelfTestService: FitnetBLEService, PSelfTestService {
             log.warning("[\(self.name)] Tried to start already-running self-test")
             return
         }
+        self.stateChar.state = SelfTestState.notStarted
         stateChar.write(state: SelfTestState.running)
     }
     

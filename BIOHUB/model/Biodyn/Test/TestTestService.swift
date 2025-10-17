@@ -24,6 +24,11 @@ class TestTestService: PTestService, TestWithDelays {
         log.info("Beep boop testing setting the LED to \(value ? "on" : "off")")
     }
     
+    func readLEDValueAsync() async {
+        try? await Task.sleep(for: .milliseconds(40))
+        ledValue = ledInternal
+    }
+    
     func readLEDValue() {
         doAtSomePoint {
             self.ledValue = self.ledInternal

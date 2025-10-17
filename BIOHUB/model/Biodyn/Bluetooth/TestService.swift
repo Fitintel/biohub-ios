@@ -41,6 +41,10 @@ public class TestService: FitnetBLEService, PTestService {
     public func readLEDValue() {
         ledControlChar.readValue()
     }
+    
+    public func readLEDValueAsync() async {
+        await ledControlChar.readValueAsync(timeout: .milliseconds(200))
+    }
 
     @Observable
     private class LEDControlChar : FitnetBLEChar {

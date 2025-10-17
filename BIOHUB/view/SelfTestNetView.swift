@@ -15,15 +15,6 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
     
     var body: some View {
         VStack {
-//            HStack {
-//                Button(action: {
-//                    netMode.close()
-//                    let _ = app.net.path.popLast()
-//                }) {
-//                    Text("Back")
-//                }
-//                Spacer()
-//            }
             List (app.fitnet.biodyns, id: \.uuid.uuidString) { item in
                 VStack {
                     HStack {
