@@ -15,6 +15,10 @@ import simd
 public class FitnetFloat3Char: FitnetBLEChar {
     var value: SIMD3<Float>?
     
+    public override func onLoaded() {
+        // No eageer read
+    }
+    
     public override func onRead(_ data: Data) {
         // Convert data to float array
         let floatArray = data.withUnsafeBytes {
