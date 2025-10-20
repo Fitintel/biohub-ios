@@ -18,11 +18,11 @@ struct SIMD3View: View {
     
     var body: some View {
         HStack {
-            Text("\(String(format: "%.2f", simd3?.x ?? 0))").monospaced()
+            Text("\(String(format: "%.2f", simd3?.x ?? 0))").monospaced().font(.system(size: 9))
             Spacer()
-            Text("\(String(format: "%.2f", simd3?.y ?? 0))").monospaced()
+            Text("\(String(format: "%.2f", simd3?.y ?? 0))").monospaced().font(.system(size: 9))
             Spacer()
-            Text("\(String(format: "%.2f", simd3?.z ?? 0))").monospaced()
+            Text("\(String(format: "%.2f", simd3?.z ?? 0))").monospaced().font(.system(size: 9))
         }
         .animation(nil, value: UUID())
     }

@@ -12,8 +12,8 @@ import Foundation
 public class IMUNetMode<B: PBiodyn, BDiscovery: PeripheralsDiscovery<B>> : PollingNetMode<B, BDiscovery,  IMUDataStream>
 where BDiscovery.Listener == any PeripheralsDiscoveryListener<B> {
     
-    public let maxPlanarAccel: Float = 20
-    public let maxGyroAccel: Float = 5
+    public let maxPlanarAccel: Float = 30 // m/s^2
+    public let maxGyroAccel: Float = 720 // deg\s
     public let maxMagnetometer: Float = 5
     public let avgReadDelay: Double = 0
     
@@ -40,14 +40,14 @@ where BDiscovery.Listener == any PeripheralsDiscoveryListener<B> {
                         DatedFloat3(readTime: readTime, read: biodyn.imuService.gyroAccel!)
                     )
                 }
-                group.addTask {
-                    await biodyn.imuService.readMagnetometerAsync()
-                    let readTime = Date.now
-                    if biodyn.imuService.magnetometer == nil { return }
-                    self.ensureStream(biodyn).addMag(
-                        DatedFloat3(readTime: readTime, read: biodyn.imuService.magnetometer!)
-                    )
-                }
+//                group.addTask {
+//                    await biodyn.imuService.readMagnetometerAsync()
+//                    let readTime = Date.now
+//                    if biodyn.imuService.magnetometer == nil { return }
+//                    self.ensureStream(biodyn).addMag(
+//                        DatedFloat3(readTime: readTime, read: biodyn.imuService.magnetometer!)
+//                    )
+//                }
             }
             await group.waitForAll()
         }

@@ -14,9 +14,9 @@ public protocol PDataFastService: Observable {
     var gyroAccel: DatedFloat3List? { get }
     var magnetometer: DatedFloat3List? { get }
     
-    var sampleStart: Date? { get }
-    var sampleEnd: Date? { get }
-    
     func read()
     func readAsync() async
+    
+    func readIMU()
+    func readIMUAsync() async
 }

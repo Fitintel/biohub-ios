@@ -22,6 +22,15 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
                 Text(app.fitnet.biodynDiscovery.getDiscoveryError()).multilineTextAlignment(.center)
             } else if !app.fitnet.hasBiodyns {
                 Text("Scanning for FITNET devices")
+                Button(action: {
+                    Task {
+                        app.fitnet.biodynDiscovery.stopDiscovery()
+                        try? await Task.sleep(for: .milliseconds(20))
+                        app.fitnet.biodynDiscovery.startDiscovery()
+                    }
+                }) {
+                    Text("Refresh")
+                }
                 ProgressView()
             } else {
                 Divider()

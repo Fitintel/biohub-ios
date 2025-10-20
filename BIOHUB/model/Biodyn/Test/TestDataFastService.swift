@@ -51,6 +51,12 @@ public class TestDataFastService: PDataFastService, TestWithDelays {
         self.syncWithInternal()
     }
     
+    public func readIMU() {
+    }
+    
+    public func readIMUAsync() async {
+    }
+
     private func syncWithInternal() {
         self.emg = DatedFloatList.interpolate(samples: cEmg, start: start, end: end)
         self.planarAccel = DatedFloat3List.interpolate(samples: cPlanar, start: start, end: end)
@@ -61,6 +67,7 @@ public class TestDataFastService: PDataFastService, TestWithDelays {
     private func simulate() async {
         // TODO: me
     }
+    
 
 
 }
