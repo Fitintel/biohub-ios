@@ -19,14 +19,19 @@ where BDiscovery.Listener == any PeripheralsDiscoveryListener<B> {
         await withTaskGroup(of: Void.self) { group in
             for biodyn in fitnet.biodyns {
                 group.addTask {
-                    await biodyn.dfService.readAsync()
+//                    await biodyn.dfService.readAsync()
+                    await biodyn.dfService.readIMUAsync()
                     let stream = self.ensureStream(biodyn)
                     
-                    if biodyn.dfService.emg == nil { return }
-                    stream.emg.addAll(biodyn.dfService.emg!)
+                    if biodyn.dfService.emg != nil {
+                        stream.emg.addAll(biodyn.dfService.emg!)
+                    }
                     
                     if biodyn.dfService.planarAccel == nil { return }
+                    let beforeCnt = stream.imu.planar.latest.list.count
                     stream.imu.addAllPlanar(biodyn.dfService.planarAccel!)
+                    let diff = stream.imu.planar.latest.list.count - beforeCnt
+                    log.info("[\(self.tag)] Added \(diff) new datapoint(s)")
                     
                     if biodyn.dfService.gyroAccel == nil { return }
                     stream.imu.addAllGyro(biodyn.dfService.gyroAccel!)

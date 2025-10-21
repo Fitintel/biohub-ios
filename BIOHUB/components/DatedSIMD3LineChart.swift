@@ -55,7 +55,7 @@ struct DatedSIMD3LineChart: View {
         .onAppear {
             snapshotTask?.cancel()
             snapshotTask = Task {
-                let interval: Duration = .milliseconds(90)
+                let interval: Duration = .milliseconds(150)
                 while !Task.isCancelled {
                     await MainActor.run {
                         lastSnapshot = data.segments.map { Array($0.list) }

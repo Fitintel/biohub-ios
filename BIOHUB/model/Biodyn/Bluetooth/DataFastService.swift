@@ -17,16 +17,19 @@ public class DataFastService: FitnetBLEService, PDataFastService {
     private static let IMU_COLLECTIVE_UUID = CBUUID(data: Data([UInt8]([0x41, 0x53])))
 
     public var emg: DatedFloatList?
-    public var planarAccel: DatedFloat3List?
-    public var gyroAccel: DatedFloat3List?
-    public var magnetometer: DatedFloat3List?
+    public var planarAccel: DatedFloat3List? { get { packedImuChar.planar } }
+    public var gyroAccel: DatedFloat3List? { get { packedImuChar.gyro } }
+    public var magnetometer: DatedFloat3List? { get { packedImuChar.mag } }
+    
+    private var packedImuChar: PackedIMUChar
     
     public init(_ peripheral: CBPeripheral) {
-        // TODO: this
+        let pic = PackedIMUChar(peripheral)
+        self.packedImuChar = pic
         
         super.init(peripheral, name: "Data Fast Service",
                    uuid: Self.SERVICE_UUID,
-                   characteristics: [])
+                   characteristics: [pic])
     }
 
     public func read() {
@@ -38,18 +41,61 @@ public class DataFastService: FitnetBLEService, PDataFastService {
     }
     
     public func readIMU() {
-        // TODO: this
+        packedImuChar.readValue()
     }
     
     public func readIMUAsync() async {
-        // TODO: this
+        await packedImuChar.readValueAsync(timeout: .milliseconds(200))
     }
     
+    @Observable
     private class PackedIMUChar: FitnetBLEChar {
+        
+        var planar: DatedFloat3List?
+        var gyro: DatedFloat3List?
+        var mag: DatedFloat3List?
         
         init(_ peripheral: CBPeripheral) {
             super.init(peripheral, "Packed IMU", IMU_COLLECTIVE_UUID)
         }
         
+        public override func onLoaded() {
+            // No eager read
+        }
+        
+        public override func onRead(_ data: Data) {
+            // Convert data to float array
+            let floatArray = data.withUnsafeBytes {
+                Array(UnsafeBufferPointer<Float>(start: $0.baseAddress!.assumingMemoryBound(to: Float.self), count: data.count / MemoryLayout<Float>.stride))
+            }
+            
+            var planar: [SIMD3<Float>] = []
+            var gyro: [SIMD3<Float>] = []
+            var mag: [SIMD3<Float>] = []
+
+            // TODO: first and last float are timestamps
+            for i in 0...floatArray.count {
+                if i % 9 == 2 {
+                    planar.append(SIMD3<Float>(floatArray[i-2], floatArray[i-1], floatArray[i]))
+                } else if i % 9 == 5 {
+                    gyro.append(SIMD3<Float>(floatArray[i-2], floatArray[i-1], floatArray[i]))
+                } else if i % 9 == 8 {
+                    mag.append(SIMD3<Float>(floatArray[i-2], floatArray[i-1], floatArray[i]))
+                }
+            }
+            
+            let start = Date.init(timeIntervalSinceNow: -0.2)
+            let didRead = Date.now
+            self.planar = DatedFloat3List.interpolate(samples: planar, start: start, end: didRead)
+            self.gyro = DatedFloat3List.interpolate(samples: gyro, start: start, end: didRead)
+            self.mag = DatedFloat3List.interpolate(samples: mag, start: start, end: didRead)
+            
+//            log.info("[\(self.name)] Got \(planar.count) new entries: \(planar.last!.x) \(planar.last!.y) \(planar.last!.z)")
+        }
+        
+        public override func writeValue(data: Data, type: CBCharacteristicWriteType) {
+            log.error("[\(self.name)] Cannot write to read-only char")
+        }
+
     }
 }

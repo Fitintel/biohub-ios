@@ -32,6 +32,12 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
                 Text("Collecting data...")
                 ProgressView()
             }
+            List($app.fitnet.biodyns, id: \.uuid.uuidString) { $biodyn in
+                VStack {
+                    DatedSIMD3LineChart(max: 30, data: dNet.dataFor(biodyn).imu.planar)
+//                    DatedSIMD3LineChart(max: 30, data: dNet.dataFor(biodyn).imu.gyro)
+                }
+            }
         }
         .navigationTitle("Net Data Collection")
         .onDisappear {

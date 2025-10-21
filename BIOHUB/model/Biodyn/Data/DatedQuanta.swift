@@ -70,8 +70,11 @@ where T: Encodable & Decodable {
     
     public static func interpolate(samples: [T], start: Date, end: Date) -> Self {
         let l = Self()
-        for i in 0...samples.count {
-            let rt = Date(timeIntervalSince1970: (Double(i) / (end.timeIntervalSince1970 - start.timeIntervalSince1970) + start.timeIntervalSince1970))
+        let begin = start.timeIntervalSince1970
+        let elapsed = end.timeIntervalSince1970 - begin
+        for i in samples.indices {
+            let dpt = elapsed * (Double(i + 1) / Double(samples.count)) + begin
+            let rt = Date(timeIntervalSince1970: dpt)
             l.append(DatedQuanta(readTime: rt,
                                  read: samples[i]))
         }
