@@ -7,11 +7,14 @@
 
 import Foundation
 
-public struct IMURecord: Encodable, Decodable {
-    public let data: Dictionary<String, IMUDataStream>
+public typealias IMURecord = DatedRecord<IMUDataStream>
+public typealias FullDataRecord = DatedRecord<FullDataStream>
+
+public struct DatedRecord<T: Encodable & Decodable>: Encodable, Decodable {
+    public let data: Dictionary<String, T>
     public let time: Date
     
-    public init(data: Dictionary<String, IMUDataStream>, time: Date) {
+    public init(data: Dictionary<String, T>, time: Date) {
         self.data = data
         self.time = time
     }
@@ -20,7 +23,7 @@ public struct IMURecord: Encodable, Decodable {
     private enum CodingKeys: String, CodingKey { case data, time }
     public init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        self.data = try container.decode([String : IMUDataStream].self, forKey: .data)
+        self.data = try container.decode([String : T].self, forKey: .data)
         self.time =  Date(timeIntervalSince1970: try container.decode(Double.self, forKey: .time))
     }
     public func encode(to encoder: any Encoder) throws {
