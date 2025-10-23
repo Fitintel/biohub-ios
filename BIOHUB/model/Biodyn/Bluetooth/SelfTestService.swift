@@ -13,12 +13,15 @@ public class SelfTestService: FitnetBLEService, PSelfTestService {
     private static let SERVICE_UUID = CBUUID(data: Data([UInt8]([0xA9, 0x12])))
     private static let SELF_TEST_STATE_UUID = CBUUID(data: Data([UInt8]([0x1A, 0x10])))
     private static let SELF_TEST_MSG_UUID = CBUUID(data: Data([UInt8]([0x1A, 0x11])))
+    private static let SELF_TEST_LED = CBUUID(data: Data([UInt8]([0x1A, 0x12])))
 
     public var selfTestState: SelfTestState? { get { stateChar.state } }
     public var selfTestError: String? { get { errMsgChar.value } }
+    public var ledValue: Bool? { get { ledControlChar.value } }
     
     private let stateChar: SelfTestStateChar
     private let errMsgChar: FitnetStringChar
+    private let ledControlChar: FitnetBoolChar
     
     init(_ peripheral: CBPeripheral) {
         let state = SelfTestStateChar(peripheral)
@@ -27,15 +30,19 @@ public class SelfTestService: FitnetBLEService, PSelfTestService {
         let msg = FitnetStringChar(peripheral, "Self Test Message", Self.SELF_TEST_MSG_UUID)
         self.errMsgChar = msg
         
+        let led = FitnetBoolChar(peripheral, "LED State", Self.SELF_TEST_LED)
+        self.ledControlChar = led
+        
         super.init(peripheral,
                    name: "Self Test Service",
                    uuid: Self.SERVICE_UUID,
-                   characteristics: [state, msg])
+                   characteristics: [state, msg, led])
     }
     
     public func read() {
         stateChar.readValue()
         errMsgChar.readValue()
+        ledControlChar.readValue()
     }
     
     public func runSelfTest() {
@@ -47,6 +54,19 @@ public class SelfTestService: FitnetBLEService, PSelfTestService {
         stateChar.write(state: SelfTestState.running)
     }
     
+    // Writes the LED value
+    public func writeLEDValue(value: Bool) {
+        ledControlChar.writeValue(data: Data([UInt8]([value ? 1 : 0])),
+                                  type: .withResponse)
+    }
+    
+    // Reads LED value
+    public func readLEDValue() { ledControlChar.readValue() }
+    
+    public func readLEDValueAsync() async {
+        await ledControlChar.readValueAsync(timeout: .milliseconds(200))
+    }
+
     @Observable
     private class SelfTestStateChar: FitnetBLEChar {
         

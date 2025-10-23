@@ -14,8 +14,8 @@
             filePath = "BIOHUB/model/Biodyn/Bluetooth/Biodyn.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "87"
-            endingLineNumber = "87"
+            startingLineNumber = "72"
+            endingLineNumber = "72"
             landmarkName = "loadCharacteristic(_:_:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -30,8 +30,8 @@
             filePath = "BIOHUB/model/Biodyn/Bluetooth/Biodyn.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "76"
-            endingLineNumber = "76"
+            startingLineNumber = "61"
+            endingLineNumber = "61"
             landmarkName = "loadService(_:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -46,8 +46,8 @@
             filePath = "BIOHUB/model/Biodyn/Bluetooth/SelfTestService.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "75"
-            endingLineNumber = "75"
+            startingLineNumber = "95"
+            endingLineNumber = "95"
             landmarkName = "onRead(_:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -62,8 +62,8 @@
             filePath = "BIOHUB/model/Biodyn/Bluetooth/SelfTestService.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "72"
-            endingLineNumber = "72"
+            startingLineNumber = "92"
+            endingLineNumber = "92"
             landmarkName = "onRead(_:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -78,8 +78,8 @@
             filePath = "BIOHUB/model/Biodyn/Bluetooth/SelfTestService.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "71"
-            endingLineNumber = "71"
+            startingLineNumber = "91"
+            endingLineNumber = "91"
             landmarkName = "onRead(_:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -94,8 +94,8 @@
             filePath = "BIOHUB/model/Biodyn/Bluetooth/SelfTestService.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "67"
-            endingLineNumber = "67"
+            startingLineNumber = "87"
+            endingLineNumber = "87"
             landmarkName = "write(state:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -126,8 +126,8 @@
             filePath = "BIOHUB/model/Biodyn/Bluetooth/DataFastService.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "94"
-            endingLineNumber = "94"
+            startingLineNumber = "101"
+            endingLineNumber = "101"
             landmarkName = "onRead(_:)"
             landmarkType = "7">
          </BreakpointContent>

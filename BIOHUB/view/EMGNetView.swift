@@ -41,8 +41,6 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
                 VStack {
                     HStack {
                         Text("\(biodyn.deviceInfoService.systemIdStr ?? "UNKNOWN"):")
-                        Spacer()
-                        Text("\(biodyn.emgService.emg?.formatted() ?? "?")")
                     }
                     .animation(nil, value: UUID())
                     DatedFloatLineChart(max: emgNet.maxEMG, data: emgNet.dataFor(biodyn).floats)

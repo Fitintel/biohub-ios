@@ -35,18 +35,18 @@ where BDiscovery.Listener == any PeripheralsDiscoveryListener<B> {
                 try? await Task.sleep(for: .milliseconds(250))
                 for b in fitnet.biodyns {
                     b.selfTestService.read()
-                    await b.testService.readLEDValueAsync()
-                    if b.testService.ledValue == true {
-                        b.testService.writeLEDValue(value: false)
+                    await b.selfTestService.readLEDValueAsync()
+                    if b.selfTestService.ledValue == true {
+                        b.selfTestService.writeLEDValue(value: false)
                     } else {
-                        b.testService.writeLEDValue(value: true)
+                        b.selfTestService.writeLEDValue(value: true)
                     }
                 }
             }
             
             // Set all back off when done
             for b in fitnet.biodyns {
-                b.testService.writeLEDValue(value: false)
+                b.selfTestService.writeLEDValue(value: false)
             }
         }
     }

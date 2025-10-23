@@ -11,25 +11,34 @@ import CoreBluetooth
 
 @Observable
 public class DataFastService: FitnetBLEService, PDataFastService {
-    
     private static let SERVICE_UUID = CBUUID(data: Data([UInt8]([0x14, 0x32])))
-    private static let PACKED_COLLECTIVE_UUID = CBUUID(data: Data([UInt8]([0x41, 0x60])))
     private static let IMU_COLLECTIVE_UUID = CBUUID(data: Data([UInt8]([0x41, 0x53])))
+    private static let PACKED_COLLECTIVE_UUID = CBUUID(data: Data([UInt8]([0x41, 0x55])))
+    private static let HEARTBEAT_UUID = CBUUID(data: Data([UInt8]([0x41, 0x57])))
+    private static let RTT_UUID = CBUUID(data: Data([UInt8]([0x41, 0x58])))
 
-    public var emg: DatedFloatList?
+    public var emg: DatedFloatList? // TODO: me
     public var planarAccel: DatedFloat3List? { get { packedImuChar.planar } }
     public var gyroAccel: DatedFloat3List? { get { packedImuChar.gyro } }
     public var magnetometer: DatedFloat3List? { get { packedImuChar.mag } }
     
     private var packedImuChar: PackedIMUChar
-    
+    private var tickerChar: FitnetUInt32Char
+    private var rttChar: FitnetUInt32Char
+
     public init(_ peripheral: CBPeripheral) {
         let pic = PackedIMUChar(peripheral)
         self.packedImuChar = pic
         
+        let tic = FitnetUInt32Char(peripheral, "Heartbeat", Self.HEARTBEAT_UUID)
+        self.tickerChar = tic
+        
+        let rtt = FitnetUInt32Char(peripheral, "RTT", Self.RTT_UUID)
+        self.rttChar = rtt
+        
         super.init(peripheral, name: "Data Fast Service",
                    uuid: Self.SERVICE_UUID,
-                   characteristics: [pic])
+                   characteristics: [pic, tic, rtt])
     }
 
     public func read() {
@@ -40,14 +49,13 @@ public class DataFastService: FitnetBLEService, PDataFastService {
         // TODO: this
     }
     
-    public func readIMU() {
-        packedImuChar.readValue()
-    }
-    
-    public func readIMUAsync() async {
-        await packedImuChar.readValueAsync(timeout: .milliseconds(200))
-    }
-    
+    public func readIMU() { packedImuChar.readValue() }
+    public func readIMUAsync() async { await packedImuChar.readValueAsync(timeout: .milliseconds(200)) }
+    public func readRTT() { rttChar.readValue() }
+    public func readRTTAsync() async { await rttChar.readValueAsync(timeout: .milliseconds(500)) }
+    public func readTicker() { tickerChar.readValue() }
+    public func readTickerAsync() async { await tickerChar.readValueAsync(timeout: .milliseconds(500)) }
+
     @Observable
     private class PackedIMUChar: FitnetBLEChar {
         
@@ -74,13 +82,12 @@ public class DataFastService: FitnetBLEService, PDataFastService {
             var mag: [SIMD3<Float>] = []
 
             // TODO: first and last float are timestamps
-            for j in 0...(floatArray.count-2) {
-                let i = j+1
-                if i % 9 == 2 {
+            for i in 0...floatArray.count {
+                if i % 10 == 2 {
                     planar.append(SIMD3<Float>(floatArray[i-2], floatArray[i-1], floatArray[i]))
-                } else if i % 9 == 5 {
+                } else if i % 10 == 5 {
                     gyro.append(SIMD3<Float>(floatArray[i-2], floatArray[i-1], floatArray[i]))
-                } else if i % 9 == 8 {
+                } else if i % 10 == 8 {
                     mag.append(SIMD3<Float>(floatArray[i-2], floatArray[i-1], floatArray[i]))
                 }
             }

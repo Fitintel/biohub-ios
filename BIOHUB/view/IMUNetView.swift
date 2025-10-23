@@ -71,12 +71,6 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
                     VStack {
                         HStack {
                             Text("\(biodyn.deviceInfoService.systemIdStr ?? "UNKNOWN") XYZ:")
-                            Spacer()
-                            switch imuGraph {
-                            case .planar: SIMD3View(simd3: biodyn.imuService.planarAccel)
-                            case .gyro: SIMD3View(simd3: biodyn.imuService.gyroAccel)
-                            case .mag: SIMD3View(simd3: biodyn.imuService.magnetometer)
-                            }
                         }
                         .animation(nil, value: UUID())
                         switch imuGraph {

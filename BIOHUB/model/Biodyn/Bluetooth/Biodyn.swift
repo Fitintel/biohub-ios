@@ -11,11 +11,8 @@ import Observation
 
 @Observable
 public class Biodyn: PBiodyn {
-    public typealias TTest = TestService
     public typealias TDeviceInfo = DeviceInformationService
     public typealias TSelfTest = SelfTestService
-    public typealias TIMU = IMUService
-    public typealias TEMG = EMGService
     public typealias TDataFast = DataFastService
 
     private static let TAG = "Biodyn"
@@ -25,10 +22,7 @@ public class Biodyn: PBiodyn {
     public let uuid: UUID
     
     public let deviceInfoService: DeviceInformationService
-    public let testService: TestService
     public let selfTestService: SelfTestService
-    public var imuService: IMUService
-    public var emgService: EMGService
     public var dfService: DataFastService
     public var avgReadDelay: Double = 0
 
@@ -47,22 +41,13 @@ public class Biodyn: PBiodyn {
         let deviceInfoService = DeviceInformationService(peripheral)
         self.deviceInfoService = deviceInfoService
         
-        let testService = TestService(peripheral)
-        self.testService = testService
-        
         let selfTestService = SelfTestService(peripheral)
         self.selfTestService = selfTestService
-        
-        let imuService = IMUService(peripheral)
-        self.imuService = imuService
-        
-        let emgService = EMGService(peripheral)
-        self.emgService = emgService
         
         let dfService = DataFastService(peripheral)
         self.dfService = dfService
         
-        self.allServices = [dfService, deviceInfoService, testService, selfTestService, imuService, emgService]
+        self.allServices = [dfService, deviceInfoService, selfTestService]
         for s in self.allServices {
             self.serviceMap.updateValue(s, forKey: s.uuid)
             for c in s.characteristics {

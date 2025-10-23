@@ -19,4 +19,10 @@ public protocol PDataFastService: Observable {
     
     func readIMU()
     func readIMUAsync() async
+    
+    func readRTT()
+    func readRTTAsync() async
+    
+    func readTicker()
+    func readTickerAsync() async
 }

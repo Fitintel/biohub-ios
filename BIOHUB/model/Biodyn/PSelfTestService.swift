@@ -19,7 +19,12 @@ public enum SelfTestState: UInt32 {
 public protocol PSelfTestService: Observable {
     var selfTestState: SelfTestState? { get }
     var selfTestError: String? { get }
-    
+    var ledValue: Bool? { get }
+
     func runSelfTest() 
     func read()
+    
+    func writeLEDValue(value: Bool)
+    func readLEDValue()
+    func readLEDValueAsync() async
 }
