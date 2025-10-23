@@ -19,7 +19,7 @@ where BDiscovery.Listener == any PeripheralsDiscoveryListener<B> {
     
     private var biodynMap = Dictionary<UUID, B>()
     
-    init(_ biodynDiscovery: BDiscovery) {
+    init(_ biodynDiscovery: BDiscovery, _ heartbeat: Heartbeat<B, BDiscovery>) {
         self.biodynDiscovery = biodynDiscovery
         self.biodyns = []
         

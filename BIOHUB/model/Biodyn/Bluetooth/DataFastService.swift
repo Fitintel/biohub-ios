@@ -74,7 +74,8 @@ public class DataFastService: FitnetBLEService, PDataFastService {
             var mag: [SIMD3<Float>] = []
 
             // TODO: first and last float are timestamps
-            for i in 0...floatArray.count {
+            for j in 0...(floatArray.count-2) {
+                let i = j+1
                 if i % 9 == 2 {
                     planar.append(SIMD3<Float>(floatArray[i-2], floatArray[i-1], floatArray[i]))
                 } else if i % 9 == 5 {

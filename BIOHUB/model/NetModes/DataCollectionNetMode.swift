@@ -10,9 +10,17 @@ import Observation
 @Observable
 public class DataCollectionNetMode<B: PBiodyn, BDiscovery: PeripheralsDiscovery<B>> : PollingNetMode<B, BDiscovery, FullDataStream>
 where BDiscovery.Listener == any PeripheralsDiscoveryListener<B> {
-
+    
+    public let heartbeat: Heartbeat<B, BDiscovery>
+    
     init(_ fitnet: Fitnet<B, BDiscovery>) {
+        self.heartbeat = Heartbeat(fitnet)
         super.init(name: "Data Collection Net Mode", fitnet: fitnet)
+    }
+    
+    override public func initAsync() async {
+        for biodyn in fitnet.biodyns {
+        }
     }
     
     public override func readAsync() async {
@@ -31,7 +39,7 @@ where BDiscovery.Listener == any PeripheralsDiscoveryListener<B> {
                     let beforeCnt = stream.imu.planar.latest.list.count
                     stream.imu.addAllPlanar(biodyn.dfService.planarAccel!)
                     let diff = stream.imu.planar.latest.list.count - beforeCnt
-                    log.info("[\(self.tag)] Added \(diff) new datapoint(s)")
+//                    log.info("[\(self.tag)] Added \(diff) new datapoint(s)")
                     
                     if biodyn.dfService.gyroAccel == nil { return }
                     stream.imu.addAllGyro(biodyn.dfService.gyroAccel!)
