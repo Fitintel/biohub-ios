@@ -25,6 +25,6 @@ public protocol PBiodyn: Observable, Identifiable {
     // Data fast service
     var dfService: TDataFast { get }
     
-    // Average read delay
-    var avgReadDelay: Double { get }
+    // Average read delay in ms
+    var avgReadDelay: Double? { get }
 }

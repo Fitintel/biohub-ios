@@ -50,6 +50,9 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
             }.padding()
             List($app.fitnet.biodyns, id: \.uuid.uuidString) { $biodyn in
                 VStack {
+                    let takenAvg = String(format: "%.2f", dNet.pointsTakenAvg.average ?? 0)
+                    let canTake = biodyn.dfService.pointsRecieved?.formatted() ?? "?"
+                    Text("Avg points taken: \(takenAvg)/\(canTake)")
                     DatedSIMD3LineChart(max: 30, data: dNet.dataFor(biodyn).imu.planar)
                     //                    DatedSIMD3LineChart(max: 30, data: dNet.dataFor(biodyn).imu.gyro)
                 }

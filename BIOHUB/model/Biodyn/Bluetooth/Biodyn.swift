@@ -16,24 +16,21 @@ public class Biodyn: PBiodyn {
     public typealias TDataFast = DataFastService
 
     private static let TAG = "Biodyn"
-    public static let READ_AVG_KEEPS: Int = 50
-    private var readAvgPtr: Int = 0
     
     public let uuid: UUID
-    
     public let deviceInfoService: DeviceInformationService
     public let selfTestService: SelfTestService
     public var dfService: DataFastService
-    public var avgReadDelay: Double = 0
+    public var avgReadDelay: Double? { get { return averageRead.average } }
 
     // Connected peripheral
     let peripheral: CBPeripheral
 
-    let allServices: [FitnetBLEService]
-    var serviceMap = Dictionary<CBUUID, FitnetBLEService>();
-    var charServMap = Dictionary<CBUUID, FitnetBLEService>();
-    var readDelays: [Double] = Array(repeating: 0, count: READ_AVG_KEEPS)
-    
+    public let allServices: [FitnetBLEService]
+    public private(set)var serviceMap = Dictionary<CBUUID, FitnetBLEService>();
+    public private(set)var charServMap = Dictionary<CBUUID, FitnetBLEService>();
+    private let averageRead = RollingAverage(keepCount: 40)
+
     init(_ peripheral: CBPeripheral) {
         self.peripheral = peripheral
         self.uuid = peripheral.identifier
@@ -88,21 +85,7 @@ public class Biodyn: PBiodyn {
             return
         }
         let delay = s.characteristicsMap[forCharacteristic.uuid]!.readTime
-        readDelays[readAvgPtr] = delay
-        readAvgPtr = (readAvgPtr + 1) % Self.READ_AVG_KEEPS
-        let hasValue = readDelays.count(where: { x in x != 0})
-        avgReadDelay = readDelays.reduce(0, { a,b in
-            if a == 0 {
-                return b
-            } else if b == 0 {
-                return a
-            } else {
-                return a + b
-            }
-        })
-        if hasValue != 0 {
-            avgReadDelay /= Double(hasValue)
-        }
+        averageRead.add(delay * 1000)
     }
     
 }

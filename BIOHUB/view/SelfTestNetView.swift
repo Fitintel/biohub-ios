@@ -50,9 +50,8 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
                         Spacer()
                     }
                     HStack {
-                        let readDelay = UInt32(item.avgReadDelay * 1000)
                         Text("-->").font(.system(size: 10))
-                        Text("Avg read \(readDelay)ms").font(.system(size: 9))
+                        Text("Avg read \(UInt32(item.avgReadDelay ?? 0))ms").font(.system(size: 9))
                         Spacer()
                     }
                     HStack {

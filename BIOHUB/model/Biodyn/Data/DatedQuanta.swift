@@ -17,8 +17,10 @@ public typealias DatedFloat = DatedQuanta<Float>
 public typealias DatedFloatList = DatedQList<Float>
 public typealias DatedFloatSegments = DatedQSegments<Float>
 
+public typealias Quanta = Decodable & Encodable & CustomStringConvertible
+
 public struct DatedQuanta<T>: Identifiable, Encodable, Decodable
-where T: Encodable & Decodable {
+where T: Quanta {
     public let id = UUID()
     public let readTime: Date
     public let read: T
@@ -44,11 +46,19 @@ where T: Encodable & Decodable {
 
 @Observable
 public class DatedQList<T>: Identifiable, Observable, Encodable, Decodable
-where T: Encodable & Decodable {
+where T: Quanta {
+    public let toleranceSeconds = Double(5) / Double(1000) // 5 ms
+    
     public let id = UUID()
-    public var list: [DatedQuanta<T>] = []
+    public var list: [DatedQuanta<T>]
+    private var newest = Date.now
 
-    public required init() {}
+    public required init() {
+        self.list = []
+    }
+    public init(_ list: [DatedQuanta<T>]) {
+        self.list = list
+    }
     
     public func append(_ v: DatedQuanta<T>) {
         self.list.append(v)
@@ -56,9 +66,9 @@ where T: Encodable & Decodable {
     
     public func appendAll(_ v : DatedQList<T>) {
         // Time-aware
-        let latest = self.list.last?.readTime ?? Date(timeIntervalSince1970: 0)
         for item in v.list {
-            if item.readTime > latest {
+            if item.readTime > newest {
+                newest = item.readTime
                 self.append(item)
             }
         }
@@ -75,8 +85,7 @@ where T: Encodable & Decodable {
         for i in samples.indices {
             let dpt = elapsed * (Double(i + 1) / Double(samples.count)) + begin
             let rt = Date(timeIntervalSince1970: dpt)
-            l.append(DatedQuanta(readTime: rt,
-                                 read: samples[i]))
+            l.append(DatedQuanta(readTime: rt, read: samples[i]))
         }
         return l
     }
@@ -95,7 +104,7 @@ where T: Encodable & Decodable {
 
 @Observable
 public class DatedQSegments<T>: Encodable, Decodable, Identifiable, Observable
-where T: Encodable & Decodable {
+where T: Quanta {
     public var latest: DatedQList<T> { get { segments.last! } }
     
     public let id = UUID()

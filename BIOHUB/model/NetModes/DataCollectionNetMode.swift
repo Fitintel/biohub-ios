@@ -12,14 +12,16 @@ public class DataCollectionNetMode<B: PBiodyn, BDiscovery: PeripheralsDiscovery<
 where BDiscovery.Listener == any PeripheralsDiscoveryListener<B> {
     
     public let heartbeat: Heartbeat<B, BDiscovery>
+    public let pointsTakenAvg = RollingAverage(keepCount: 30)
     
     init(_ fitnet: Fitnet<B, BDiscovery>) {
         self.heartbeat = Heartbeat(fitnet)
-        super.init(name: "Data Collection Net Mode", fitnet: fitnet)
+        super.init(name: "DataCollectionNetMode", fitnet: fitnet)
     }
     
     override public func initAsync() async {
         for biodyn in fitnet.biodyns {
+            // TODO: set ticker
         }
     }
     
@@ -27,25 +29,27 @@ where BDiscovery.Listener == any PeripheralsDiscoveryListener<B> {
         await withTaskGroup(of: Void.self) { group in
             for biodyn in fitnet.biodyns {
                 group.addTask {
-//                    await biodyn.dfService.readAsync()
-                    await biodyn.dfService.readIMUAsync()
+                    await biodyn.dfService.readAsync()
                     let stream = self.ensureStream(biodyn)
                     
                     if biodyn.dfService.emg != nil {
                         stream.emg.addAll(biodyn.dfService.emg!)
                     }
                     
-                    if biodyn.dfService.planarAccel == nil { return }
-                    let beforeCnt = stream.imu.planar.latest.list.count
-                    stream.imu.addAllPlanar(biodyn.dfService.planarAccel!)
-                    let diff = stream.imu.planar.latest.list.count - beforeCnt
-//                    log.info("[\(self.tag)] Added \(diff) new datapoint(s)")
+                    if biodyn.dfService.planarAccel != nil {
+                        let beforeCnt = stream.imu.planar.latest.list.count
+                        stream.imu.addAllPlanar(biodyn.dfService.planarAccel!) // Add planar data
+                        let afterCnt = stream.imu.planar.latest.list.count
+                        self.pointsTakenAvg.add(Double(afterCnt - beforeCnt)) // Add point difference to read avg taken
+                    }
                     
-                    if biodyn.dfService.gyroAccel == nil { return }
-                    stream.imu.addAllGyro(biodyn.dfService.gyroAccel!)
+                    if biodyn.dfService.gyroAccel != nil {
+                        stream.imu.addAllGyro(biodyn.dfService.gyroAccel!) // Add gyro data
+                    }
                     
-                    if biodyn.dfService.magnetometer == nil { return }
-                    stream.imu.addAllMag(biodyn.dfService.magnetometer!)
+                    if biodyn.dfService.magnetometer != nil {
+                        stream.imu.addAllMag(biodyn.dfService.magnetometer!) // Add mag data
+                    }
                 }
             }
             

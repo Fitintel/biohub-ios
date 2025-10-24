@@ -32,6 +32,12 @@ public class Heartbeat<B: PBiodyn, BDiscovery: PeripheralsDiscovery<B>>
 
 extension Date {
     public static func currentFitnetTick() -> UInt64 {
-        return UInt64(Date.now.timeIntervalSince1970 * 1_000_000)
+        return Date.now.asFitnetTick()
+    }
+    public static func fromFitnetTick(_ tick: UInt64) -> Date {
+        return Date.init(timeIntervalSince1970: Double(tick) / 1_000_000)
+    }
+    public func asFitnetTick() -> UInt64 {
+        return UInt64(self.timeIntervalSince1970 * 1_000_000)
     }
 }

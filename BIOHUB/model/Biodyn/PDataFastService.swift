@@ -20,9 +20,6 @@ public protocol PDataFastService: Observable {
     func read()
     func readAsync() async
     
-    func readIMU()
-    func readIMUAsync() async
-    
     func readRTT()
     func readRTTAsync() async
     func writeRTT(_ value: UInt64)
@@ -36,6 +33,10 @@ extension PDataFastService {
     public var tickerErrorMs: Double? { get {
         if tickerError == nil { return nil }
         return Double(tickerError!) / 1_000.0
-    }
-    }
+    }}
+    
+    public var pointsRecieved: Int? { get {
+        if planarAccel == nil { return nil }
+        return planarAccel?.list.count
+    }}
 }

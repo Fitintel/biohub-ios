@@ -72,7 +72,7 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
                         }
                         HStack {
                             Text("-->").font(.system(size: 10))
-                            Text("Hardware \(item.deviceInfoService.harwareRevStr ?? "") by \(item.deviceInfoService.manufNameStr ?? "") [\(UInt32(item.avgReadDelay * 1000))ms]")
+                            Text("Hardware \(item.deviceInfoService.harwareRevStr ?? "") by \(item.deviceInfoService.manufNameStr ?? "") [\(UInt32(item.avgReadDelay ?? 0))ms]")
                                 .font(.system(size: 10))
                             Spacer()
                         }
