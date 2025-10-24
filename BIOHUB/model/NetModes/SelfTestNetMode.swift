@@ -17,7 +17,6 @@ where BDiscovery.Listener == any PeripheralsDiscoveryListener<B> {
     
     init(_ fitnet: Fitnet<B, BDiscovery>) {
         self.fitnet = fitnet
-        //        self.start()
     }
     
     public func start() {
@@ -35,6 +34,7 @@ where BDiscovery.Listener == any PeripheralsDiscoveryListener<B> {
                 try? await Task.sleep(for: .milliseconds(250))
                 for b in fitnet.biodyns {
                     b.selfTestService.read()
+                    b.dfService.readTicker()
                     await b.selfTestService.readLEDValueAsync()
                     if b.selfTestService.ledValue == true {
                         b.selfTestService.writeLEDValue(value: false)

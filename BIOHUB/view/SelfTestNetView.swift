@@ -18,7 +18,7 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
             List (app.fitnet.biodyns, id: \.uuid.uuidString) { item in
                 VStack {
                     HStack {
-                        Text("BIODYN \(item.deviceInfoService.systemIdStr ?? "?") \(item.deviceInfoService.firmwareRevStr ?? "?") Avg read \(UInt32(item.avgReadDelay * 1000))ms")
+                        Text("BIODYN \(item.deviceInfoService.systemIdStr ?? "?") \(item.deviceInfoService.firmwareRevStr ?? "?")")
                         Spacer()
                         switch item.selfTestService.selfTestState {
                         case .completedWithError:
@@ -39,6 +39,27 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
                         case .none:
                             Text("?")
                         }
+                    }
+                    HStack {
+                        Text("-->").font(.system(size: 10))
+                        let hard = item.deviceInfoService.harwareRevStr ?? ""
+                        let manuf = item.deviceInfoService.manufNameStr ?? ""
+                        let model = item.deviceInfoService.modelNumStr ?? ""
+                        let serial = item.deviceInfoService.serialNumStr ?? ""
+                        Text("Hardware \(hard) by \(manuf) [Model \(model), Serial \(serial)]").font(.system(size: 9))
+                        Spacer()
+                    }
+                    HStack {
+                        let readDelay = UInt32(item.avgReadDelay * 1000)
+                        Text("-->").font(.system(size: 10))
+                        Text("Avg read \(readDelay)ms").font(.system(size: 9))
+                        Spacer()
+                    }
+                    HStack {
+                        let ticker = item.dfService.ticker?.formatted() ?? "No heartbeat"
+                        Text("-->").font(.system(size: 10))
+                        Text("Tick \(ticker)").font(.system(size: 9))
+                        Spacer()
                     }
                     if item.selfTestService.selfTestState == SelfTestState.completedWithError {
                         if item.selfTestService.selfTestError != nil {

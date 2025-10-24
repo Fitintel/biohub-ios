@@ -27,3 +27,22 @@ public class FitnetUInt32Char: FitnetBLEChar {
     }
     
 }
+
+// Read/write UInt64 char
+@Observable
+public class FitnetUInt64Char: FitnetBLEChar {
+    var value: UInt64? = nil
+    
+    public override func onRead(_ data: Data) {
+        self.value = data.withUnsafeBytes { ptr in
+            ptr.load(as: UInt64.self)
+        }
+    }
+    
+    public func writeValue(_ value: UInt64) {
+        var v = value
+        writeValue(data: withUnsafeBytes(of: &v) { Data($0) },
+                   type: .withResponse)
+    }
+    
+}

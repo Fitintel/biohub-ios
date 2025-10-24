@@ -13,6 +13,8 @@ public protocol PDataFastService: Observable {
     var planarAccel: DatedFloat3List? { get }
     var gyroAccel: DatedFloat3List? { get }
     var magnetometer: DatedFloat3List? { get }
+    var ticker: UInt64? { get }
+    var rtt: UInt64? { get }
     
     func read()
     func readAsync() async

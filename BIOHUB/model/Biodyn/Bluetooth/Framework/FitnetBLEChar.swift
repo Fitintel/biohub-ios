@@ -76,7 +76,6 @@ public class FitnetBLEChar: Observable {
             log.error("[\(self.name)] Attempted to read value of unloaded characteristic")
             return
         }
-        precondition(readCont == nil, "[\(name)] Concurrent read/write async calls are not supported")
 
         readValue()
         

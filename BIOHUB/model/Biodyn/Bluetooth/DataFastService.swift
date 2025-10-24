@@ -21,19 +21,21 @@ public class DataFastService: FitnetBLEService, PDataFastService {
     public var planarAccel: DatedFloat3List? { get { packedImuChar.planar } }
     public var gyroAccel: DatedFloat3List? { get { packedImuChar.gyro } }
     public var magnetometer: DatedFloat3List? { get { packedImuChar.mag } }
-    
+    public var ticker: UInt64? { get { tickerChar.value } }
+    public var rtt: UInt64? { get { rttChar.value }  }
+
     private var packedImuChar: PackedIMUChar
-    private var tickerChar: FitnetUInt32Char
-    private var rttChar: FitnetUInt32Char
+    private var tickerChar: FitnetUInt64Char
+    private var rttChar: FitnetUInt64Char
 
     public init(_ peripheral: CBPeripheral) {
         let pic = PackedIMUChar(peripheral)
         self.packedImuChar = pic
         
-        let tic = FitnetUInt32Char(peripheral, "Heartbeat", Self.HEARTBEAT_UUID)
+        let tic = FitnetUInt64Char(peripheral, "Heartbeat", Self.HEARTBEAT_UUID)
         self.tickerChar = tic
         
-        let rtt = FitnetUInt32Char(peripheral, "RTT", Self.RTT_UUID)
+        let rtt = FitnetUInt64Char(peripheral, "RTT", Self.RTT_UUID)
         self.rttChar = rtt
         
         super.init(peripheral, name: "Data Fast Service",
@@ -82,12 +84,13 @@ public class DataFastService: FitnetBLEService, PDataFastService {
             var mag: [SIMD3<Float>] = []
 
             // TODO: first and last float are timestamps
+            let numFloats = 11
             for i in 0...floatArray.count {
-                if i % 10 == 2 {
+                if i % numFloats == 2 {
                     planar.append(SIMD3<Float>(floatArray[i-2], floatArray[i-1], floatArray[i]))
-                } else if i % 10 == 5 {
+                } else if i % numFloats == 5 {
                     gyro.append(SIMD3<Float>(floatArray[i-2], floatArray[i-1], floatArray[i]))
-                } else if i % 10 == 8 {
+                } else if i % numFloats == 8 {
                     mag.append(SIMD3<Float>(floatArray[i-2], floatArray[i-1], floatArray[i]))
                 }
             }
