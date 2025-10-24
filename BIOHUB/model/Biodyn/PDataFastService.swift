@@ -14,6 +14,7 @@ public protocol PDataFastService: Observable {
     var gyroAccel: DatedFloat3List? { get }
     var magnetometer: DatedFloat3List? { get }
     var ticker: UInt64? { get }
+    var tickerError: Int64? { get }
     var rtt: UInt64? { get }
     
     func read()
@@ -24,7 +25,17 @@ public protocol PDataFastService: Observable {
     
     func readRTT()
     func readRTTAsync() async
+    func writeRTT(_ value: UInt64)
     
     func readTicker()
     func readTickerAsync() async
+    func writeTicker(_ value: UInt64)
+}
+
+extension PDataFastService {
+    public var tickerErrorMs: Double? { get {
+        if tickerError == nil { return nil }
+        return Double(tickerError!) / 1_000.0
+    }
+    }
 }

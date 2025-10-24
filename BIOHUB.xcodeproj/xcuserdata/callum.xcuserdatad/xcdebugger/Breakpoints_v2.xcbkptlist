@@ -126,8 +126,8 @@
             filePath = "BIOHUB/model/Biodyn/Bluetooth/DataFastService.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "104"
-            endingLineNumber = "104"
+            startingLineNumber = "132"
+            endingLineNumber = "132"
             landmarkName = "onRead(_:)"
             landmarkType = "7">
          </BreakpointContent>

@@ -57,8 +57,9 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
                     }
                     HStack {
                         let ticker = item.dfService.ticker?.formatted() ?? "No heartbeat"
+                        let tickerErr = item.dfService.tickerErrorMs?.formatted() ?? "Unknown "
                         Text("-->").font(.system(size: 10))
-                        Text("Tick \(ticker)").font(.system(size: 9))
+                        Text("Tick \(ticker) with error of \(tickerErr)ms").font(.system(size: 9))
                         Spacer()
                     }
                     if item.selfTestService.selfTestState == SelfTestState.completedWithError {

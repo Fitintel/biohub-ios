@@ -6,6 +6,7 @@
 //
 
 import Observation
+import Foundation
 
 @Observable
 public class SelfTestNetMode<B: PBiodyn, BDiscovery: PeripheralsDiscovery<B>>
@@ -14,9 +15,11 @@ where BDiscovery.Listener == any PeripheralsDiscoveryListener<B> {
     
     public let fitnet: Fitnet<B, BDiscovery>
     private var readTask: Task<Void, Never>? = nil
+    public var heartbeat: Heartbeat<B, BDiscovery>
     
     init(_ fitnet: Fitnet<B, BDiscovery>) {
         self.fitnet = fitnet
+        self.heartbeat = Heartbeat(fitnet)
     }
     
     public func start() {
@@ -24,8 +27,15 @@ where BDiscovery.Listener == any PeripheralsDiscoveryListener<B> {
         self.readTask = Task {
             for b in fitnet.biodyns {
                 b.selfTestService.runSelfTest()
+                b.dfService.writeRTT(40000)
             }
-            try? await Task.sleep(for: .milliseconds(150))
+            try? await Task.sleep(for: .milliseconds(200))
+            for b in fitnet.biodyns {
+                let ticker = Date.currentFitnetTick()
+                log.info("[SelfTestNetMode] Setting ticker to \(ticker)")
+                b.dfService.writeTicker(ticker)
+            }
+            try? await Task.sleep(for: .milliseconds(300))
             for b in fitnet.biodyns {
                 b.selfTestService.read()
             }
