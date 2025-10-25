@@ -21,10 +21,9 @@ public protocol PSelfTestService: Observable {
     var selfTestError: String? { get }
     var ledValue: Bool? { get }
 
-    func runSelfTest() 
-    func read()
+    func runSelfTest() async
+    func read() async
     
-    func writeLEDValue(value: Bool)
-    func readLEDValue()
-    func readLEDValueAsync() async
+    func writeLEDValue(value: Bool) async
+    func readLEDValue() async
 }

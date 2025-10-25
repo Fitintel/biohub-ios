@@ -94,7 +94,7 @@ public class Biodyn: PBiodyn {
             return
         }
         if !s.notifyWrite(forCharacteristic) {
-            log.error("[\(Self.TAG)] Characteristic read \(forCharacteristic.uuid) in \(s.name) failed")
+            log.error("[\(Self.TAG)] Characteristic write \(forCharacteristic.uuid) in \(s.name) failed")
             return
         }
     }

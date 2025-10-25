@@ -61,8 +61,8 @@ public class DataFastService: FitnetBLEService, PDataFastService {
     public func readRTTAsync() async { await rttChar.readValueAsync(timeout: .milliseconds(500)) }
     public func readTicker() { tickerChar.readValue() }
     public func readTickerAsync() async { await tickerChar.readValueAsync(timeout: .milliseconds(500)) }
-    public func writeRTT(_ value: UInt64) { rttChar.writeValue(value) }
-    public func writeTicker(_ value: UInt64) { tickerChar.writeValue(value) }
+    public func writeRTT(_ value: UInt64) async { await rttChar.writeValue(value) }
+    public func writeTicker(_ value: UInt64) async { await tickerChar.writeValue(value) }
     
     @Observable
     private class TickerChar: FitnetUInt64Char {

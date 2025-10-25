@@ -17,13 +17,13 @@ public class FitnetBLEChar: Observable {
     var peripheral: CBPeripheral
     public private(set)var readTime: TimeInterval = 0
     
-    private enum BleResult { case timeout, writeConfirmation, read(Data) }
-    
     // To catch when readValue is overwritten to see if readValueAsync should run
     private var didRequestRead: Bool = false
-    
-    private var bleCont: CheckedContinuation<BleResult, Error>?
     private var startRead: Date = Date.now
+    
+    private enum BleResult { case timeout, writeConfirmation, read(Data) }
+    private var bleCont: CheckedContinuation<BleResult, Error>?
+    private var contLock = NSLock()
     
     init(_ peripheral: CBPeripheral, _ name: String, _ uuid: CBUUID) {
         self.name = name
@@ -46,18 +46,12 @@ public class FitnetBLEChar: Observable {
     final func onReadInternal(_ data: Data) {
         readTime = Date.now.timeIntervalSince(startRead)
         onRead(data)
-        if let cont = bleCont {
-            bleCont = nil
-            cont.resume(returning: .read(data))
-        }
+        resume(.read(data))
     }
     
     final func onWriteInternal() {
         onWrite()
-        if let cont = bleCont {
-            bleCont = nil
-            cont.resume(returning: .writeConfirmation)
-        }
+        resume(.writeConfirmation)
     }
     
     func writeValue(data: Data, type: CBCharacteristicWriteType) {
@@ -99,7 +93,7 @@ public class FitnetBLEChar: Observable {
         let res = await bleNotif("read", timeout)
         if res != nil {
             if case .read(_) = res {
-               return
+                return
             }
             log.error("[\(self.name)] Got a non-read response in readValueAsync!")
         }
@@ -120,13 +114,10 @@ public class FitnetBLEChar: Observable {
     
     private func bleNotif(_ op: String, _ timeout: Duration) async -> BleResult? {
         // Start a cancelable timeout that races the read
-        let timeoutTask = Task { @MainActor [weak self] in
+        let timeoutTask = Task { [weak self] in
             try? await Task.sleep(for: timeout)
             guard let self = self else { return }
-            if let cont = self.bleCont {
-                self.bleCont = nil
-                cont.resume(returning: BleResult.timeout)
-            }
+            self.resume(.timeout)
         }
         defer { timeoutTask.cancel() }
         do {
@@ -134,7 +125,7 @@ public class FitnetBLEChar: Observable {
                 self.bleCont = cont
             }
             if case .timeout = res {
-                log.warning("[\(self.name)] Failed to \(op): timed out")
+                log.warning("[\(self.name)] Failed to \(op) async: timed out")
                 return nil
             }
             return res
@@ -142,5 +133,17 @@ public class FitnetBLEChar: Observable {
             log.error("[\(self.name)] Failed to \(op) async: \(error.localizedDescription)")
             return nil
         }
+    }
+    
+    private func takeCont() -> CheckedContinuation<BleResult, Error>? {
+        contLock.lock(); defer { contLock.unlock() }
+        let c = bleCont
+        bleCont = nil
+        return c
+    }
+    
+    private func resume(_ r: BleResult) {
+        guard let c = takeCont() else { return }
+        c.resume(returning: r);
     }
 }

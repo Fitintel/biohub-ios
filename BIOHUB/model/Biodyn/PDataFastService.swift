@@ -17,16 +17,13 @@ public protocol PDataFastService: Observable {
     var tickerError: Int64? { get }
     var rtt: UInt64? { get }
     
-    func read()
-    func readAsync() async
+    func read() async
     
-    func readRTT()
-    func readRTTAsync() async
-    func writeRTT(_ value: UInt64)
+    func readRTT() async
+    func writeRTT(_ value: UInt64) async
     
-    func readTicker()
-    func readTickerAsync() async
-    func writeTicker(_ value: UInt64)
+    func readTicker() async
+    func writeTicker(_ value: UInt64) async
 }
 
 extension PDataFastService {

@@ -28,6 +28,7 @@ public class SelfTestService: FitnetBLEService, PSelfTestService {
         self.stateChar = state
         
         let msg = FitnetStringChar(peripheral, "Self Test Message", Self.SELF_TEST_MSG_UUID)
+        msg.print = false
         self.errMsgChar = msg
         
         let led = FitnetBoolChar(peripheral, "LED State", Self.SELF_TEST_LED)
@@ -39,33 +40,38 @@ public class SelfTestService: FitnetBLEService, PSelfTestService {
                    characteristics: [state, msg, led])
     }
     
-    public func read() {
-        stateChar.readValue()
-        errMsgChar.readValue()
-        ledControlChar.readValue()
+    public func read() async {
+        await withTaskGroup(of: Void.self) { group in
+            group.addTask {
+                await self.stateChar.readValueAsync(timeout: .milliseconds(400))
+            }
+            group.addTask {
+                await self.errMsgChar.readValueAsync(timeout: .milliseconds(400))
+            }
+            group.addTask {
+                await self.ledControlChar.readValueAsync(timeout: .milliseconds(400))
+            }
+            await group.waitForAll()
+        }
     }
     
-    public func runSelfTest() {
+    public func runSelfTest() async {
         if selfTestState == SelfTestState.running {
             log.warning("[\(self.name)] Tried to start already-running self-test")
             return
         }
         self.stateChar.state = SelfTestState.notStarted
-        stateChar.write(state: SelfTestState.running)
+        await stateChar.write(state: SelfTestState.running)
     }
     
     // Writes the LED value
-    public func writeLEDValue(value: Bool) {
-        ledControlChar.writeValue(data: Data([UInt8]([value ? 1 : 0])),
-                                  type: .withResponse)
+    public func writeLEDValue(value: Bool) async {
+        await ledControlChar.writeValueAsync(data: Data([UInt8]([value ? 1 : 0])),
+                                             timeout: .milliseconds(2000))
     }
     
     // Reads LED value
-    public func readLEDValue() { ledControlChar.readValue() }
-    
-    public func readLEDValueAsync() async {
-        await ledControlChar.readValueAsync(timeout: .milliseconds(200))
-    }
+    public func readLEDValue() async { await ledControlChar.readValueAsync(timeout: .milliseconds(400)) }
 
     @Observable
     private class SelfTestStateChar: FitnetBLEChar {
@@ -76,7 +82,7 @@ public class SelfTestService: FitnetBLEService, PSelfTestService {
             super.init(peripheral, "Self Test State", SELF_TEST_STATE_UUID)
         }
         
-        func write(state: SelfTestState) {
+        func write(state: SelfTestState) async {
             if state != SelfTestState.cancelled && state != SelfTestState.running {
                 log.error("[\(self.name)] Can only cancel or start running self-test, got \(state.rawValue)")
                 return
@@ -84,7 +90,7 @@ public class SelfTestService: FitnetBLEService, PSelfTestService {
             
             var data = Data()
             withUnsafeBytes(of: state.rawValue) { data.append(contentsOf: $0) }
-            super.writeValue(data: data, type: .withResponse)
+            await super.writeValueAsync(data: data, timeout: .milliseconds(400))
         }
         
         override func onRead(_ data: Data) {

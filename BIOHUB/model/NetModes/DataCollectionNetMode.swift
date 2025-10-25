@@ -29,7 +29,7 @@ where BDiscovery.Listener == any PeripheralsDiscoveryListener<B> {
         await withTaskGroup(of: Void.self) { group in
             for biodyn in fitnet.biodyns {
                 group.addTask {
-                    await biodyn.dfService.readAsync()
+                    await biodyn.dfService.read()
                     let stream = self.ensureStream(biodyn)
                     
                     if biodyn.dfService.emg != nil {

@@ -13,10 +13,11 @@ import CoreBluetooth
 @Observable
 public class FitnetStringChar: FitnetBLEChar {
     var value: String? = nil
+    var print: Bool = true
     
     public override func onRead(_ data: Data) {
         self.value = String(data: data, encoding: .ascii)
-        if self.value != nil && !(self.value!.isEmpty) {
+        if self.value != nil && !(self.value!.isEmpty) && print {
             log.info("[\(self.name)] Read \"\(self.value ?? "nil")\"")
         }
     }
