@@ -68,9 +68,9 @@ public class FitnetBLEChar: Observable {
             log.error("[\(self.name)] Attempted to read value of unloaded characteristic")
             return
         }
-        startRead = Date.now
         didRequestRead = true
         peripheral.readValue(for: self.cbChar!)
+        startRead = Date.now
     }
     
     // Waits for written value

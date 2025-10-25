@@ -10,7 +10,7 @@ import SwiftUI
 import Observation
 
 @Observable
-public class BluetoothPeripheralsDiscovery: NSObject, ObservableObject, CBCentralManagerDelegate, PeripheralsDiscovery {
+public final class BluetoothPeripheralsDiscovery: NSObject, ObservableObject, CBCentralManagerDelegate, PeripheralsDiscovery {
     public typealias Peripheral = Biodyn
     public typealias Listener = PeripheralsDiscoveryListener<Biodyn>
 

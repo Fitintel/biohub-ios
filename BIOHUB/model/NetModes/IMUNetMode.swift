@@ -26,7 +26,6 @@ where BDiscovery.Listener == any PeripheralsDiscoveryListener<B> {
             for biodyn in fitnet.biodyns {
                 group.addTask {
                     await biodyn.dfService.read()
-                    let readTime = Date.now
                     if biodyn.dfService.planarAccel != nil {
                         self.ensureStream(biodyn).addAllPlanar(biodyn.dfService.planarAccel!)
                     }
@@ -38,7 +37,6 @@ where BDiscovery.Listener == any PeripheralsDiscoveryListener<B> {
                     }
                 }
             }
-            await group.waitForAll()
         }
     }
     

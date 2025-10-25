@@ -73,8 +73,8 @@ public class DataFastService: FitnetBLEService, PDataFastService {
         }
         
         override func onRead(_ data: Data) {
-            super.onRead(data)
             tickRead = Date.currentFitnetTick()
+            super.onRead(data)
         }
     }
     

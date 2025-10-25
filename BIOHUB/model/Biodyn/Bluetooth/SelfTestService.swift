@@ -51,7 +51,6 @@ public class SelfTestService: FitnetBLEService, PSelfTestService {
             group.addTask {
                 await self.ledControlChar.readValueAsync(timeout: .milliseconds(400))
             }
-            await group.waitForAll()
         }
     }
     

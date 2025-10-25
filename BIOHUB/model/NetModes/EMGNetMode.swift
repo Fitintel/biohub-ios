@@ -23,12 +23,11 @@ where BDiscovery.Listener == any PeripheralsDiscoveryListener<B> {
             for biodyn in fitnet.biodyns {
                 group.addTask {
                     await biodyn.dfService.read()
-                    let readTime = Date.now
-                    if biodyn.dfService.emg == nil { return }
-                    self.ensureStream(biodyn).addAll(biodyn.dfService.emg!)
+                    if biodyn.dfService.emg != nil {
+                        self.ensureStream(biodyn).addAll(biodyn.dfService.emg!)
+                    }
                 }
             }
-            await group.waitForAll()
         }
     }
     

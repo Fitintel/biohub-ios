@@ -64,9 +64,9 @@ class BluetoothPeripheralDelegate: NSObject, ObservableObject, CBPeripheralDeleg
     
     // Called when a value has been written
     func peripheral(_ peripheral: CBPeripheral, didWriteValueFor characteristic: CBCharacteristic, error: Error?) {
-//        log.info("[\(Self.TAG)] Did write \(characteristic.uuid.uuidString)")
+        //        log.info("[\(Self.TAG)] Did write \(characteristic.uuid.uuidString)")
         biodyn.notifyWrite(characteristic)
     }
-
+    
     
 }

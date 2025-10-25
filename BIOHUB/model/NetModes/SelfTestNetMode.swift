@@ -31,7 +31,6 @@ where BDiscovery.Listener == any PeripheralsDiscoveryListener<B> {
                 for b in fitnet.biodyns {
                     group.addTask { await b.selfTestService.runSelfTest() }
                 }
-                await group.waitForAll()
             }
             // Write RTT and ticker
             await withTaskGroup(of: Void.self) { group in
@@ -41,14 +40,12 @@ where BDiscovery.Listener == any PeripheralsDiscoveryListener<B> {
                         await b.dfService.writeTicker(Date.currentFitnetTick())
                     }
                 }
-                await group.waitForAll()
             }
             // Read self test value
             await withTaskGroup(of: Void.self) { group in
                 for b in fitnet.biodyns {
                     group.addTask { await b.selfTestService.read() }
                 }
-                await group.waitForAll()
             }
             
             // Start read loop
@@ -60,8 +57,9 @@ where BDiscovery.Listener == any PeripheralsDiscoveryListener<B> {
                         group.addTask { await b.dfService.readTicker() }
                         group.addTask { await b.selfTestService.read() }
                     }
-                    await group.waitForAll()
                 }
+                // Heartbeat tuning
+                await heartbeat.optimizeRTT()
                 // LED control -> separating makes more in sync
                 await withTaskGroup(of: Void.self) { group in
                     for b in fitnet.biodyns {
@@ -73,7 +71,6 @@ where BDiscovery.Listener == any PeripheralsDiscoveryListener<B> {
                             }
                         }
                     }
-                    await group.waitForAll()
                 }
             }
             

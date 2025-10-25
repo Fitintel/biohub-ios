@@ -18,11 +18,20 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
     var body: some View {
         VStack {
             VStack {
-                Button(role: dNet.isPolling ? .destructive : nil , action: {
-                    dNet.isPolling ? dNet.stopPolling() : dNet.startPolling()
-                }) {
-                    Text(dNet.isPolling ? "Stop Data Collection" : "Start Data Collection")
-                }
+                HStack {
+                    Button(action: {
+                        dNet.stopPolling()
+                        dNet.reset()
+                    }) {
+                        Text("Back")
+                    }
+                    Spacer()
+                    Button(role: dNet.isPolling ? .destructive : nil , action: {
+                        dNet.isPolling ? dNet.stopPolling() : dNet.startPolling()
+                    }) {
+                        Text(dNet.isPolling ? "Stop Data Collection" : "Start Data Collection")
+                    }
+                }.padding()
                 HStack {
                     Button(action: {
                         dNet.reset()
@@ -58,6 +67,7 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
             }
         }
         .navigationTitle("Net Data Collection")
+        .navigationBarBackButtonHidden()
         .onDisappear {
             dNet.stopPolling()
             dNet.reset()

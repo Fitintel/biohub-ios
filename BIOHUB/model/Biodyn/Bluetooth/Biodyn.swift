@@ -29,7 +29,7 @@ public class Biodyn: PBiodyn {
     public let allServices: [FitnetBLEService]
     public private(set)var serviceMap = Dictionary<CBUUID, FitnetBLEService>();
     public private(set)var charServMap = Dictionary<CBUUID, FitnetBLEService>();
-    private let averageRead = RollingAverage(keepCount: 40)
+    private let averageRead = RollingAverage(keepCount: 1)
 
     init(_ peripheral: CBPeripheral) {
         self.peripheral = peripheral
