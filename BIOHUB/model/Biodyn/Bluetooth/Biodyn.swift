@@ -88,4 +88,15 @@ public class Biodyn: PBiodyn {
         averageRead.add(delay * 1000)
     }
     
+    public func notifyWrite(_ forCharacteristic: CBCharacteristic) {
+        guard let s = charServMap[forCharacteristic.uuid] else {
+            log.error("[\(Self.TAG)] Could not find characteristic \(forCharacteristic.uuid)")
+            return
+        }
+        if !s.notifyWrite(forCharacteristic) {
+            log.error("[\(Self.TAG)] Characteristic read \(forCharacteristic.uuid) in \(s.name) failed")
+            return
+        }
+    }
+    
 }

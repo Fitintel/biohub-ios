@@ -17,12 +17,12 @@ public class FitnetBLEChar: Observable {
     var peripheral: CBPeripheral
     public private(set)var readTime: TimeInterval = 0
     
-    private enum TimeoutError: Error { case timeout }
+    private enum BleResult { case timeout, writeConfirmation, read(Data) }
     
     // To catch when readValue is overwritten to see if readValueAsync should run
     private var didRequestRead: Bool = false
     
-    private var readCont: CheckedContinuation<Data, Error>?
+    private var bleCont: CheckedContinuation<BleResult, Error>?
     private var startRead: Date = Date.now
     
     init(_ peripheral: CBPeripheral, _ name: String, _ uuid: CBUUID) {
@@ -40,14 +40,23 @@ public class FitnetBLEChar: Observable {
     
     // Client callback with data read from this characteristic
     open func onRead(_ data: Data) {}
+    open func onWrite() {}
     
     // Callback with data read from this characteristic
     final func onReadInternal(_ data: Data) {
         readTime = Date.now.timeIntervalSince(startRead)
         onRead(data)
-        if let cont = readCont {
-            readCont = nil
-            cont.resume(returning: data)
+        if let cont = bleCont {
+            bleCont = nil
+            cont.resume(returning: .read(data))
+        }
+    }
+    
+    final func onWriteInternal() {
+        onWrite()
+        if let cont = bleCont {
+            bleCont = nil
+            cont.resume(returning: .writeConfirmation)
         }
     }
     
@@ -70,34 +79,68 @@ public class FitnetBLEChar: Observable {
         peripheral.readValue(for: self.cbChar!)
     }
     
+    // Waits for written value
+    func writeValueAsync(data: Data, timeout: Duration) async {
+        guard checkWR() else { return }
+        writeValue(data: data, type: .withResponse)
+        let res = await bleNotif("write", timeout)
+        if res != nil {
+            if case .writeConfirmation = res {
+                return
+            }
+            log.error("[\(self.name)] Got a non-write response in writeValueAsync!")
+        }
+    }
+    
     // Waits for read value
     func readValueAsync(timeout: Duration) async {
-        guard self.loaded else {
-            log.error("[\(self.name)] Attempted to read value of unloaded characteristic")
-            return
-        }
-
+        guard checkWR() else { return }
         readValue()
-        
+        let res = await bleNotif("read", timeout)
+        if res != nil {
+            if case .read(_) = res {
+               return
+            }
+            log.error("[\(self.name)] Got a non-read response in readValueAsync!")
+        }
+    }
+    
+    // Ensures that reading/writing is allowed
+    private func checkWR() -> Bool {
+        guard self.loaded else {
+            log.error("[\(self.name)] Attempted to write value of unloaded characteristic")
+            return false
+        }
+        guard self.bleCont == nil else {
+            log.error("[\(self.name)] Attempted to read already reading/writing characteristic")
+            return false
+        }
+        return true
+    }
+    
+    private func bleNotif(_ op: String, _ timeout: Duration) async -> BleResult? {
         // Start a cancelable timeout that races the read
         let timeoutTask = Task { @MainActor [weak self] in
             try? await Task.sleep(for: timeout)
             guard let self = self else { return }
-            if let cont = self.readCont {
-                self.readCont = nil
-                cont.resume(throwing: TimeoutError.timeout)
+            if let cont = self.bleCont {
+                self.bleCont = nil
+                cont.resume(returning: BleResult.timeout)
             }
         }
         defer { timeoutTask.cancel() }
-
         do {
-            let _ = try await withCheckedThrowingContinuation { (cont: CheckedContinuation<Data, Error>) in
-                self.readCont = cont
+            let res = try await withCheckedThrowingContinuation { (cont: CheckedContinuation<BleResult, Error>) in
+                self.bleCont = cont
             }
+            if case .timeout = res {
+                log.warning("[\(self.name)] Failed to \(op): timed out")
+                return nil
+            }
+            return res
+        } catch {
+            log.error("[\(self.name)] Failed to \(op) async: \(error.localizedDescription)")
+            return nil
         }
-        catch {
-            log.error("[\(self.name)] Failed to read async: \(error.localizedDescription)")
-        }
-        
     }
 }

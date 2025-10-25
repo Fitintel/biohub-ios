@@ -34,9 +34,7 @@ public class FitnetBLEService: ObservableObject {
     // Called when this service is loaded. Default behaviour is do nothing
     open func onLoaded() {}
     
-    // DO NOT OVERRIDE THESE
-    
-    public func notifyRead(_ char: CBCharacteristic) -> Bool {
+    public final func notifyRead(_ char: CBCharacteristic) -> Bool {
         var wasRead = false
         if self.characteristicsMap[char.uuid] != nil {
             let c = characteristicsMap[char.uuid]!
@@ -50,7 +48,16 @@ public class FitnetBLEService: ObservableObject {
         return wasRead
     }
     
-    public func loadService(_ service: CBService) -> Bool {
+    public final func notifyWrite(_ char: CBCharacteristic) -> Bool {
+        var wasWritten = false
+        if self.characteristicsMap[char.uuid] != nil {
+            characteristicsMap[char.uuid]!.onWriteInternal()
+            wasWritten = true
+        }
+        return wasWritten
+    }
+
+    public final func loadService(_ service: CBService) -> Bool {
         if service.uuid == uuid {
             foundService = true
             onLoaded()
@@ -60,7 +67,7 @@ public class FitnetBLEService: ObservableObject {
         return false
     }
     
-    public func loadCharacteristic(_ char: CBCharacteristic) -> Bool {
+    public final func loadCharacteristic(_ char: CBCharacteristic) -> Bool {
         // Check if service found
         if !foundService {
             log.error("[\(self.name)] Has not found service UUID yet")

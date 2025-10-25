@@ -62,4 +62,10 @@ class BluetoothPeripheralDelegate: NSObject, ObservableObject, CBPeripheralDeleg
         biodyn.notifyRead(characteristic)
     }
     
+    // Called when a value has been written
+    func peripheral(_ peripheral: CBPeripheral, didWriteValueFor characteristic: CBCharacteristic, error: Error?) {
+        biodyn.notifyWrite(characteristic)
+    }
+
+    
 }

@@ -50,6 +50,11 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
                 }
                 .tabItem { Label("Create Net", systemImage: "antenna.radiowaves.left.and.right") }
                 .tag(Tab.net)
+                .onChange(of: app.fitnet.biodyns.isEmpty) { wasEmpty, isEmpty in
+                    if isEmpty && !wasEmpty {
+                        app.net.path.removeAll()
+                    }
+                }
             }
         }
         .environmentObject(authService)
