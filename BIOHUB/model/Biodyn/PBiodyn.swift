@@ -37,8 +37,10 @@ extension PBiodyn {
         if let rd = avgReadDelay {
             if let wd = avgWriteDelay {
                 return (rd + wd) / 2.0
+            } else {
+                return rd
             }
         }
-        return nil
+        return avgWriteDelay
     }}
 }

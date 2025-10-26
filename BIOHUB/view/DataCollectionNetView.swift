@@ -58,11 +58,12 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
                     .disabled(!app.isLoggedIn || dNet.isPolling || isUploading || isUploaded)
                 }
             }.padding()
+            HStack {
+                let takenAvgPct = Int((dNet.capacity.average ?? 0) * 100)
+                Text("Running at capacity: \(takenAvgPct)%")
+            }.padding()
             List($app.fitnet.biodyns, id: \.uuid.uuidString) { $biodyn in
                 VStack {
-                    let takenAvg = String(format: "%.1f", dNet.pointsTakenAvg.average ?? 0)
-                    let canTake = biodyn.dfService.pointsRecieved?.formatted() ?? "??"
-                    Text("Avg points taken: \(takenAvg)/\(canTake)")
                     DatedSIMD3LineChart(max: 30, data: dNet.dataFor(biodyn).imu.planar)
                 }
             }

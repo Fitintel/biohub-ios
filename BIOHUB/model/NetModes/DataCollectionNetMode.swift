@@ -12,7 +12,7 @@ public class DataCollectionNetMode<B: PBiodyn, BDiscovery: PeripheralsDiscovery<
 where BDiscovery.Listener == any PeripheralsDiscoveryListener<B> {
     
     public let heartbeat: Heartbeat<B, BDiscovery>
-    public let pointsTakenAvg = RollingAverage(keepCount: 30)
+    public let capacity = RollingAverage(keepCount: 50)
     
     init(_ fitnet: Fitnet<B, BDiscovery>) {
         self.heartbeat = Heartbeat(fitnet)
@@ -41,8 +41,9 @@ where BDiscovery.Listener == any PeripheralsDiscoveryListener<B> {
                         let beforeCnt = stream.imu.planar.latest.list.count
                         stream.imu.addAllPlanar(biodyn.dfService.planarAccel!) // Add planar data
                         let afterCnt = stream.imu.planar.latest.list.count
+                        let canTake = biodyn.dfService.planarAccel!.list.count
                         Task { @MainActor in
-                            self.pointsTakenAvg.add(Double(afterCnt - beforeCnt)) // Add point difference to read avg taken
+                            self.capacity.add(Double(afterCnt - beforeCnt) / Double(canTake)) // Add point difference to read avg taken
                         }
                     }
                     
