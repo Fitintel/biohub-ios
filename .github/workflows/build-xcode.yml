@@ -58,7 +58,7 @@ jobs:
           echo "Building scheme: $scheme (type: $filetype_parameter file: $file_to_build)"
 
           # Resolve SPM packages if used
-          xcodebuild -"$filetype_parameter" "$file_to_build" -scheme "$scheme" -resolvePackageDependencies
+          xcodebuild -"$filetype_parameter" "$file_to_build" -scheme "$scheme" -destination 'platform=iOS Simulator,name=iPhone SE (3rd generation),OS=18.6' -resolvePackageDependencies
 
           # Build + Analyze for simulator. Write raw output to a log file so we can see full errors.
           # Use an explicit simulator destination to avoid code signing / device issues on CI.
