@@ -12,6 +12,7 @@ public class Heartbeat<B: PBiodyn, BDiscovery: PeripheralsDiscovery<B>>
     where BDiscovery.Listener == any PeripheralsDiscoveryListener<B> {
     
     private let fitnet: Fitnet<B, BDiscovery>
+    let tag: String = "Heartbeat"
 
     public init(_ fitnet: Fitnet<B, BDiscovery>) {
         self.fitnet = fitnet
@@ -22,23 +23,26 @@ public class Heartbeat<B: PBiodyn, BDiscovery: PeripheralsDiscovery<B>>
             for b in fitnet.biodyns {
                 group.addTask {
                     // Measure average error
-                    let avgErr = RollingAverage(keepCount: 10)
-                    for _ in 0...15 {
+                    let measurements = 8
+                    let avgErr = RollingAverage(keepCount: measurements)
+                    for _ in 0...(measurements - 1) {
                         await b.dfService.readTicker()
                         guard let tickErrMs = b.dfService.tickerErrorMs else { continue }
-                        log.info("[Heartbeat] Err \(tickErrMs), avg \(b.avgReadDelay ?? 0)")
                         avgErr.add(tickErrMs)
                     }
-                    
+
                     // Re-read the info we want
                     await b.dfService.readRTT()
-                    await b.dfService.readTicker()
-                    // Try to get sub 5ms error
-                    if avgErr.average! > 5 {
-                        guard let measuredRTTMs = b.avgReadDelay else { return }
+                    // Try to get sub 2ms error
+                    if avgErr.average! > 2 {
                         guard let rttBeforeTicks = b.dfService.rtt else { return }
                         let rttBeforeMs = Double(rttBeforeTicks) / 1000.0
-                        log.info("[Heartbeat] Current RTT on device \(String(format: "%.1f", rttBeforeMs))ms, measured \(String(format: "%.1f", measuredRTTMs))ms, error of \(String(format: "%.1f", avgErr.average!))")
+//                        log.info("[Heartbeat] Current RTT on device \(String(format: "%.1f", rttBeforeMs))ms, measured \(String(format: "%.1f", measuredRTTMs))ms, error of \(String(format: "%.1f", avgErr.average!))")
+                        // Adjust by half error
+                        let newRttMs = rttBeforeMs + (avgErr.average! / 2.0)
+                        log.info("[\(self.tag)] Shifting \(b.deviceInfoService.systemIdStr ?? "???") RTT \(String(format: "%.1f", rttBeforeMs))ms to \(String(format: "%.1f", newRttMs))ms")
+                        await b.dfService.writeRTT(newRttMs.msToTicks())
+                        await b.dfService.writeTicker(Date.currentFitnetTick())
                     }
                 }
             }
@@ -63,5 +67,11 @@ extension Date {
     }
     public func asFitnetTick() -> UInt64 {
         return UInt64(self.timeIntervalSince1970 * 1_000_000)
+    }
+}
+
+extension Double {
+    public func msToTicks() -> UInt64 {
+        return UInt64(self * 1000)
     }
 }
