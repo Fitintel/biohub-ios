@@ -10,14 +10,25 @@ import SwiftUI
 struct SelfTestNetView<B: PBiodyn, BD: PeripheralsDiscovery<B>>: View
 where BD.Listener == any PeripheralsDiscoveryListener<B> {
     
+    private struct BiodynUIInfo {
+        let avgReadDelay: Double?
+        let avgWriteDelay: Double?
+        let avgCommDelay: Double?
+        let ticker: UInt64?
+        let tickerErrorMs: Double?
+    }
+    
     @Bindable var app: AppState<B, BD>
     @Bindable var netMode: SelfTestNetMode<B, BD>
+    @State private var uiUpdatesTask: Task<Void, Never>? = nil
+    @State private var bi: [UUID: BiodynUIInfo] = [:]
     
     var body: some View {
         VStack {
             HStack {
                 Button(action: {
                     netMode.close()
+                    stopUIUpdates()
                     let _ = app.net.path.popLast()
                 }) {
                     Text("Back")
@@ -30,6 +41,7 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
                 }
             }.padding()
             List (app.fitnet.biodyns, id: \.uuid.uuidString) { item in
+                let bd = bi[item.uuid]
                 VStack {
                     HStack {
                         Text("BIODYN \(item.deviceInfoService.systemIdStr ?? "?") \(item.deviceInfoService.firmwareRevStr ?? "?")")
@@ -65,12 +77,12 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
                     }
                     HStack {
                         Text("-->").font(.system(size: 10))
-                        Text("Avg read \(UInt32(item.avgReadDelay ?? 0))ms, Avg write \(UInt32(item.avgWriteDelay ?? 0))ms").font(.system(size: 9))
+                        Text("Avg read \(UInt32(bd?.avgReadDelay ?? 0))ms, Avg write \(UInt32(bd?.avgWriteDelay ?? 0))ms").font(.system(size: 9))
                         Spacer()
                     }
                     HStack {
-                        let ticker = item.dfService.ticker?.formatted() ?? "No heartbeat"
-                        let tickerErr = item.dfService.tickerErrorMs?.formatted() ?? "Unknown "
+                        let ticker = bd?.ticker?.formatted() ?? "No heartbeat"
+                        let tickerErr = bd?.tickerErrorMs?.formatted() ?? "Unknown "
                         Text("-->").font(.system(size: 10))
                         Text("Tick \(ticker) with error of \(tickerErr)ms").font(.system(size: 9))
                         Spacer()
@@ -99,11 +111,34 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
         .navigationTitle("Net Self-Test")
         .navigationBarBackButtonHidden()
         .onAppear {
+            startUIUpdates()
             netMode.start()
         }
         .onDisappear {
+            stopUIUpdates()
             netMode.close()
         }
-        
+    }
+    
+    private func startUIUpdates() {
+        uiUpdatesTask = Task {
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .milliseconds(500))
+                for b in app.fitnet.biodyns {
+                    bi[b.uuid] = BiodynUIInfo(
+                        avgReadDelay: b.avgReadDelay,
+                        avgWriteDelay: b.avgWriteDelay,
+                        avgCommDelay: b.avgCommDelay,
+                        ticker: b.dfService.ticker,
+                        tickerErrorMs: b.dfService.tickerErrorMs
+                    )
+                }
+            }
+        }
+    }
+    
+    private func stopUIUpdates() {
+        uiUpdatesTask?.cancel()
+        uiUpdatesTask = nil
     }
 }

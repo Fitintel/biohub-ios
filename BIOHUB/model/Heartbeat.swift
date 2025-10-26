@@ -40,7 +40,7 @@ public class Heartbeat<B: PBiodyn, BDiscovery: PeripheralsDiscovery<B>>
 //                        log.info("[Heartbeat] Current RTT on device \(String(format: "%.1f", rttBeforeMs))ms, measured \(String(format: "%.1f", measuredRTTMs))ms, error of \(String(format: "%.1f", avgErr.average!))")
                         // Adjust by half error
                         let newRttMs = rttBeforeMs + (avgErr.average! / 2.0)
-                        log.info("[\(self.tag)] Shifting \(b.deviceInfoService.systemIdStr ?? "???") RTT \(String(format: "%.1f", rttBeforeMs))ms to \(String(format: "%.1f", newRttMs))ms")
+//                        log.info("[\(self.tag)] Shifting \(b.deviceInfoService.systemIdStr ?? "???") RTT \(String(format: "%.1f", rttBeforeMs))ms to \(String(format: "%.1f", newRttMs))ms")
                         await b.dfService.writeRTT(newRttMs.msToTicks())
                         await b.dfService.writeTicker(Date.currentFitnetTick())
                     }
