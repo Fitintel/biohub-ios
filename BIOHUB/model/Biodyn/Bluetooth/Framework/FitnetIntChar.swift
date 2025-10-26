@@ -20,9 +20,9 @@ public class FitnetUInt32Char: FitnetBLEChar {
         }
     }
     
-    public func writeValue(_ value: UInt32) async {
+    public func writeValueAsync(_ value: UInt32) async -> BleWriteResult {
         var v = value
-        await writeValueAsync(data: withUnsafeBytes(of: &v) { Data($0) }, timeout: .milliseconds(400))
+        return await writeValueAsync(data: withUnsafeBytes(of: &v) { Data($0) }, timeout: .milliseconds(400))
     }
     
 }
@@ -38,9 +38,9 @@ public class FitnetUInt64Char: FitnetBLEChar {
         }
     }
     
-    public func writeValue(_ value: UInt64) async {
+    public func writeValueAsync(_ value: UInt64) async -> BleWriteResult {
         var v = value
-        await writeValueAsync(data: withUnsafeBytes(of: &v) { Data($0) }, timeout: .milliseconds(400))
+        return await writeValueAsync(data: withUnsafeBytes(of: &v) { Data($0) }, timeout: .milliseconds(400))
     }
     
 }

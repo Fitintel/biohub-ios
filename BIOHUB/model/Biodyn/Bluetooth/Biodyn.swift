@@ -84,8 +84,8 @@ public class Biodyn: PBiodyn {
             log.error("[\(Self.TAG)] Characteristic read \(forCharacteristic.uuid) in \(s.name) failed")
             return
         }
-        let delay = s.characteristicsMap[forCharacteristic.uuid]!.readTime
-        averageRead.add(delay * 1000)
+//        let delay = s.characteristicsMap[forCharacteristic.uuid]!.readTime
+//        averageRead.add(delay * 1000)
     }
     
     public func notifyWrite(_ forCharacteristic: CBCharacteristic) {

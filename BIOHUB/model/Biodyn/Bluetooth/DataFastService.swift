@@ -55,14 +55,11 @@ public class DataFastService: FitnetBLEService, PDataFastService {
                    characteristics: [pic, tic, rtt])
     }
     
-    public func read() { packedChar.readValue() }
-    public func readAsync() async { await packedChar.readValueAsync(timeout: .milliseconds(200)) }
-    public func readRTT() { rttChar.readValue() }
-    public func readRTTAsync() async { await rttChar.readValueAsync(timeout: .milliseconds(500)) }
-    public func readTicker() { tickerChar.readValue() }
-    public func readTickerAsync() async { await tickerChar.readValueAsync(timeout: .milliseconds(500)) }
-    public func writeRTT(_ value: UInt64) async { await rttChar.writeValue(value) }
-    public func writeTicker(_ value: UInt64) async { await tickerChar.writeValue(value) }
+    public func read() async { let _ = await packedChar.readValueAsync(timeout: .milliseconds(500)) }
+    public func readRTT() async { let _ = await rttChar.readValueAsync(timeout: .milliseconds(500)) }
+    public func readTicker() async { let _ = await tickerChar.readValueAsync(timeout: .milliseconds(500)) }
+    public func writeRTT(_ value: UInt64) async { let _ = await rttChar.writeValueAsync(value) }
+    public func writeTicker(_ value: UInt64) async { let _ = await tickerChar.writeValueAsync(value) }
     
     @Observable
     private class TickerChar: FitnetUInt64Char {
@@ -134,8 +131,9 @@ public class DataFastService: FitnetBLEService, PDataFastService {
 //            log.info("[\(self.name)] Read \(self.planar!.list.count) new datapoints")
         }
         
-        public override func writeValue(data: Data, type: CBCharacteristicWriteType) {
+        public override func writeValueAsync(data: Data, timeout: Duration) async -> BleWriteResult {
             log.error("[\(self.name)] Cannot write to read-only char")
+            return .invalid
         }
         
     }

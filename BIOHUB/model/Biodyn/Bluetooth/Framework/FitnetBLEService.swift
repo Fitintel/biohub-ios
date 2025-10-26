@@ -77,7 +77,6 @@ public class FitnetBLEService: ObservableObject {
         // Load er? i hardly know er!
         if self.characteristicsMap[char.uuid] != nil {
             let c = characteristicsMap[char.uuid]!
-            c.loaded = true
             c.cbChar = char
             c.onLoaded()
             return true

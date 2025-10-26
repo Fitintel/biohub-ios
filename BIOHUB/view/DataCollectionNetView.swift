@@ -22,6 +22,7 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
                     Button(action: {
                         dNet.stopPolling()
                         dNet.reset()
+                        let _ = app.net.path.popLast()
                     }) {
                         Text("Back")
                     }

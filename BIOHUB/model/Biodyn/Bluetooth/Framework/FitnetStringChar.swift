@@ -22,7 +22,8 @@ public class FitnetStringChar: FitnetBLEChar {
         }
     }
     
-    public override func writeValue(data: Data, type: CBCharacteristicWriteType) {
+    public override func writeValueAsync(data: Data, timeout: Duration) async -> BleWriteResult {
         log.error("[\(self.name)] Cannot write to read-only char")
+        return .invalid
     }
 }

@@ -17,7 +17,7 @@ public class FitnetBoolChar : FitnetBLEChar {
         value = data.first! > 0
     }
     
-    public func writeValue(_ value: Bool) {
-        writeValue(data: Data([UInt8]([value ? 1 : 0])), type: .withResponse)
+    public func writeValueAsync(_ value: Bool, timeout: Duration) async -> BleWriteResult {
+        return await writeValueAsync(data: Data([UInt8]([value ? 1 : 0])), timeout: timeout)
     }
 }

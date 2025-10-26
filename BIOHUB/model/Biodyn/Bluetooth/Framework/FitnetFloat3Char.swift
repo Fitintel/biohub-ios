@@ -35,7 +35,8 @@ public class FitnetFloat3Char: FitnetBLEChar {
         self.value = SIMD3<Float>([floatArray[0], floatArray[1], floatArray[2]])
     }
     
-    public override func writeValue(data: Data, type: CBCharacteristicWriteType) {
+    public override func writeValueAsync(data: Data, timeout: Duration) async -> BleWriteResult {
         log.error("[\(self.name)] Cannot write to read-only char")
+        return .invalid
     }
 }

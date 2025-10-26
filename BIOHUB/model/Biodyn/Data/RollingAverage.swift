@@ -10,31 +10,38 @@ import Foundation
 
 @Observable
 public class RollingAverage {
-    
-    public var average: Double? = nil
+    public private(set) var average: Double? = nil
+
     private var ptr: Int = 0
     private var values: [Double?]
-    private let keeps: Int
+    private let capacity: Int
+    private var runningSum: Double = 0
+    private var filledCount: Int = 0
 
     public init(keepCount: Int) {
-        values = Array(repeating: nil, count: keepCount)
-        keeps = keepCount
+        self.capacity = keepCount
+        self.values = Array(repeating: nil, count: keepCount)
     }
-    
+
     public func add(_ val: Double) {
-        values[ptr] = val
-        ptr = (ptr + 1) % keeps
-        let hasValue = values.count(where: { x in x != nil })
-        var sum: Double?
-        for v in values {
-            if v != nil && sum == nil {
-                sum = v
-            } else if v != nil {
-                sum! += v!
-            }
+        if let old = values[ptr] {
+            runningSum -= old
+        } else {
+            filledCount += 1
         }
-        if hasValue != 0 && sum != nil {
-            average = sum! / Double(hasValue)
+
+        // Insert the new value
+        values[ptr] = val
+        runningSum += val
+
+        // Advance pointer
+        ptr = (ptr + 1) % capacity
+
+        // Update average
+        if filledCount > 0 {
+            average = runningSum / Double(filledCount)
+        } else {
+            average = nil
         }
     }
 }

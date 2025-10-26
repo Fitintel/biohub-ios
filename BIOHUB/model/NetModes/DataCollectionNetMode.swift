@@ -41,7 +41,9 @@ where BDiscovery.Listener == any PeripheralsDiscoveryListener<B> {
                         let beforeCnt = stream.imu.planar.latest.list.count
                         stream.imu.addAllPlanar(biodyn.dfService.planarAccel!) // Add planar data
                         let afterCnt = stream.imu.planar.latest.list.count
-                        self.pointsTakenAvg.add(Double(afterCnt - beforeCnt)) // Add point difference to read avg taken
+                        Task { @MainActor in
+                            self.pointsTakenAvg.add(Double(afterCnt - beforeCnt)) // Add point difference to read avg taken
+                        }
                     }
                     
                     if biodyn.dfService.gyroAccel != nil {
