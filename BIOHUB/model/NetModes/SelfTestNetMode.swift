@@ -37,7 +37,6 @@ where BDiscovery.Listener == any PeripheralsDiscoveryListener<B> {
             await withTaskGroup(of: Void.self) { group in
                 for b in fitnet.biodyns {
                     group.addTask {
-                        await b.dfService.writeRTT(40000)
                         await b.dfService.writeTicker(Date.currentFitnetTick())
                     }
                 }

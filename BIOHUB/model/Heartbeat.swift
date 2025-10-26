@@ -23,7 +23,7 @@ public class Heartbeat<B: PBiodyn, BDiscovery: PeripheralsDiscovery<B>>
             for b in fitnet.biodyns {
                 group.addTask {
                     // Measure average error
-                    let measurements = 8
+                    let measurements = 15
                     let avgErr = RollingAverage(keepCount: measurements)
                     for _ in 0...(measurements - 1) {
                         await b.dfService.readTicker()
@@ -33,14 +33,18 @@ public class Heartbeat<B: PBiodyn, BDiscovery: PeripheralsDiscovery<B>>
 
                     // Re-read the info we want
                     await b.dfService.readRTT()
-                    // Try to get sub 2ms error
-                    if avgErr.average! > 2 {
+                    
+                    // Hard-set if we're super far
+                    if abs(avgErr.average!) > 15 {
+                        await b.dfService.writeRTT(b.avgReadDelay?.msToTicks() ?? 60_000)
+                        log.info("[\(self.tag)] hard setting")
+                    } else if abs(avgErr.average!) > 2 {
                         guard let rttBeforeTicks = b.dfService.rtt else { return }
                         let rttBeforeMs = Double(rttBeforeTicks) / 1000.0
 //                        log.info("[Heartbeat] Current RTT on device \(String(format: "%.1f", rttBeforeMs))ms, measured \(String(format: "%.1f", measuredRTTMs))ms, error of \(String(format: "%.1f", avgErr.average!))")
                         // Adjust by half error
                         let newRttMs = rttBeforeMs + (avgErr.average! / 2.0)
-//                        log.info("[\(self.tag)] Shifting \(b.deviceInfoService.systemIdStr ?? "???") RTT \(String(format: "%.1f", rttBeforeMs))ms to \(String(format: "%.1f", newRttMs))ms")
+                        log.info("[\(self.tag)] Shifting \(b.deviceInfoService.systemIdStr ?? "???") RTT \(String(format: "%.1f", rttBeforeMs))ms to \(String(format: "%.1f", newRttMs))ms")
                         await b.dfService.writeRTT(newRttMs.msToTicks())
                         await b.dfService.writeTicker(Date.currentFitnetTick())
                     }
