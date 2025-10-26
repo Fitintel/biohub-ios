@@ -9,6 +9,8 @@ It provides connectivity to FitNet nodes, collecting their data and orchestratin
 XCode
 - SwiftUI
 - CoreBluetooth
+- Synchronization
+- Charts
 
 Firebase
 - Firestore
