@@ -15,7 +15,7 @@ public protocol PBiodyn: Observable, Identifiable {
     
     // UUID of this device
     var uuid: UUID { get }
-
+    
     // Device information service
     var deviceInfoService: TDeviceInfo { get }
     
@@ -27,4 +27,18 @@ public protocol PBiodyn: Observable, Identifiable {
     
     // Average read delay in ms
     var avgReadDelay: Double? { get }
+    // Average write delay in ms
+    var avgWriteDelay: Double? { get }
+}
+
+
+extension PBiodyn {
+    var avgCommDelay: Double? { get {
+        if let rd = avgReadDelay {
+            if let wd = avgWriteDelay {
+                return (rd + wd) / 2.0
+            }
+        }
+        return nil
+    }}
 }

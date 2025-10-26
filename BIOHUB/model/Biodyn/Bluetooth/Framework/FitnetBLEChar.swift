@@ -37,6 +37,11 @@ public class FitnetBLEChar: Observable {
     public var cbChar: CBCharacteristic? = nil // Underlying CoreBluetooth characteristic
     public let peripheral: CBPeripheral // Underlying CoreBluetooth peripheral
     
+    fileprivate var startRead: Date? // Last read time start
+    public fileprivate(set)var readTime: TimeInterval? // Time last read took
+    public fileprivate(set)var writeTime: TimeInterval? // Time last write took
+    fileprivate var startWrite: Date? // Last write time start
+
     // WARNING: take care of mutex acquisition order to avoid deadlocks.
     // Allow read, write, or idle. Not multiple at same time.
     fileprivate let stateMux: Mutex<BleCharState?> = Mutex(nil)
@@ -154,17 +159,14 @@ private class BleCharIsReading: BleCharState {
     var name: String { get { owner.name } }
     let owner: FitnetBLEChar // Owner for state machine paradigm
     
-    private var startRead: Date? // Last read time start
-    public private(set)var readTime: TimeInterval? // Time last read took
-    
     init(_ owner: FitnetBLEChar) {
         self.owner = owner
-        startRead = Date.now
+        owner.startRead = Date.now
     }
     
     func onReadInternal(_ data: Data) -> BleCharState {
-        if let reqestTime = startRead {
-            readTime = Date.now.timeIntervalSince(reqestTime) // Measure time it took to read
+        if let reqestTime = owner.startRead {
+            owner.readTime = Date.now.timeIntervalSince(reqestTime) // Measure time it took to read
         } else {
             log.warning("[\(self.name)] Read time was not set, but got a read response") // No read start time?
         }
@@ -210,12 +212,9 @@ private class BleCharIsWriting: BleCharState {
     var name: String { get { owner.name } }
     var owner: FitnetBLEChar // Owner for state machine paradigm
     
-    public private(set)var writeTime: TimeInterval? // Time last write took
-    private var startWrite: Date? // Last write time start
-    
     init(_ owner: FitnetBLEChar) {
         self.owner = owner
-        startWrite = Date.now
+        owner.startWrite = Date.now
     }
     
     func onReadInternal(_ data: Data) -> BleCharState {
@@ -225,8 +224,8 @@ private class BleCharIsWriting: BleCharState {
     
     // State called by owner, returns new state
     func onWriteInternal() -> BleCharState {
-        if let reqestTime = startWrite {
-            writeTime = Date.now.timeIntervalSince(reqestTime) // Measure time it took to read
+        if let reqestTime = owner.startWrite {
+            owner.writeTime = Date.now.timeIntervalSince(reqestTime) // Measure time it took to read
         } else {
             log.warning("[\(self.name)] Read time was not set, but got a read response") // No read start time?
         }

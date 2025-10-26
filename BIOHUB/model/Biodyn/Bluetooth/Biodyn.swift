@@ -22,6 +22,7 @@ public class Biodyn: PBiodyn {
     public let selfTestService: SelfTestService
     public var dfService: DataFastService
     public var avgReadDelay: Double? { get { return averageRead.average } }
+    public var avgWriteDelay: Double? { get { return averageWrite.average } }
 
     // Connected peripheral
     let peripheral: CBPeripheral
@@ -29,7 +30,8 @@ public class Biodyn: PBiodyn {
     public let allServices: [FitnetBLEService]
     public private(set)var serviceMap = Dictionary<CBUUID, FitnetBLEService>();
     public private(set)var charServMap = Dictionary<CBUUID, FitnetBLEService>();
-    private let averageRead = RollingAverage(keepCount: 1)
+    private let averageRead = RollingAverage(keepCount: 20)
+    private let averageWrite = RollingAverage(keepCount: 10)
 
     init(_ peripheral: CBPeripheral) {
         self.peripheral = peripheral
@@ -84,8 +86,14 @@ public class Biodyn: PBiodyn {
             log.error("[\(Self.TAG)] Characteristic read \(forCharacteristic.uuid) in \(s.name) failed")
             return
         }
-//        let delay = s.characteristicsMap[forCharacteristic.uuid]!.readTime
-//        averageRead.add(delay * 1000)
+        if let char = s.characteristicsMap[forCharacteristic.uuid] {
+            if let delay = char.readTime {
+                averageRead.add(delay * 1000)
+            }
+            if let delay = char.writeTime {
+                averageWrite.add(delay * 1000)
+            }
+        }
     }
     
     public func notifyWrite(_ forCharacteristic: CBCharacteristic) {

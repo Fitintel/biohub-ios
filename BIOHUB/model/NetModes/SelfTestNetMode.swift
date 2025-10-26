@@ -15,8 +15,9 @@ where BDiscovery.Listener == any PeripheralsDiscoveryListener<B> {
     
     public let fitnet: Fitnet<B, BDiscovery>
     private var readTask: Task<Void, Never>? = nil
+    public var isPolling: Bool { get { readTask != nil } }
     public var heartbeat: Heartbeat<B, BDiscovery>
-    
+
     init(_ fitnet: Fitnet<B, BDiscovery>) {
         self.fitnet = fitnet
         self.heartbeat = Heartbeat(fitnet)
@@ -32,7 +33,7 @@ where BDiscovery.Listener == any PeripheralsDiscoveryListener<B> {
                     group.addTask { await b.selfTestService.runSelfTest() }
                 }
             }
-            // Write RTT and ticker
+            // Write default RTT and ticker
             await withTaskGroup(of: Void.self) { group in
                 for b in fitnet.biodyns {
                     group.addTask {
@@ -51,19 +52,14 @@ where BDiscovery.Listener == any PeripheralsDiscoveryListener<B> {
             // Start read loop
             while !Task.isCancelled {
                 try? await Task.sleep(for: .milliseconds(250))
-                // Values
                 await withTaskGroup(of: Void.self) { group in
+                    group.addTask { await self.heartbeat.optimizeRTT() }
                     for b in fitnet.biodyns {
-                        group.addTask { await b.dfService.readTicker() }
                         group.addTask { await b.selfTestService.read() }
                     }
-                }
-                // Heartbeat tuning
-                await heartbeat.optimizeRTT()
-                // LED control -> separating makes more in sync
-                await withTaskGroup(of: Void.self) { group in
                     for b in fitnet.biodyns {
                         group.addTask {
+                            await b.selfTestService.readLEDValue()
                             if b.selfTestService.ledValue == true {
                                 await b.selfTestService.writeLEDValue(value: false)
                             } else {

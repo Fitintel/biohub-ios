@@ -23,6 +23,11 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
                     Text("Back")
                 }
                 Spacer()
+                Button(action: {
+                    netMode.isPolling ? netMode.close() : netMode.start()
+                }) {
+                    Text(netMode.isPolling ? "Stop" : "Start")
+                }
             }.padding()
             List (app.fitnet.biodyns, id: \.uuid.uuidString) { item in
                 VStack {
@@ -60,7 +65,7 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
                     }
                     HStack {
                         Text("-->").font(.system(size: 10))
-                        Text("Avg read \(UInt32(item.avgReadDelay ?? 0))ms").font(.system(size: 9))
+                        Text("Avg read \(UInt32(item.avgReadDelay ?? 0))ms, Avg write \(UInt32(item.avgWriteDelay ?? 0))ms").font(.system(size: 9))
                         Spacer()
                     }
                     HStack {
