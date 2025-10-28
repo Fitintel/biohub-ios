@@ -16,7 +16,7 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
     @Binding var biodyn: B
     
     var body: some View {
-        BiodynView3DSK().ignoresSafeArea()
+        BiodynView3DSK().ignoresSafeArea().frame(height: 100)
     }
     
 }
@@ -48,7 +48,7 @@ fileprivate struct BiodynView3DSK: UIViewRepresentable {
         camera.zFar = 100
         let cameraNode = SCNNode()
         cameraNode.camera = camera
-        cameraNode.position = SCNVector3(0, 0, 1.0)
+        cameraNode.position = SCNVector3(0, 0, 2.0)
         scene.rootNode.addChildNode(cameraNode)
         
         // Spin animation for now
