@@ -1,0 +1,76 @@
+name: Xcode - Build and Analyze
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    name: Build and analyse default scheme using xcodebuild command
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set Default Scheme
+        run: |
+          # Get JSON list of schemes/workspaces/projects
+          scheme_list=$(xcodebuild -list -json | tr -d "\n")
+          default=$(echo "$scheme_list" | ruby -e "
+            require 'json'
+            j = JSON.parse(STDIN.read)
+            # Prefer project or workspace 'schemes' first
+            if j['project'] && j['project']['schemes'] && j['project']['schemes'][0]
+              puts j['project']['schemes'][0]
+            elsif j['workspace'] && j['workspace']['schemes'] && j['workspace']['schemes'][0]
+              puts j['workspace']['schemes'][0]
+            else
+              # fallback to target name if nothing else exists
+              puts (j['project'] && j['project']['targets'] && j['project']['targets'][0]) || ''
+            end
+          ")
+          if [ -z "$default" ]; then
+            echo "ERROR: Could not determine a scheme from xcodebuild -list -json"
+            exit 1
+          fi
+          echo "$default" > default
+          echo "Using default scheme: $default"
+
+      - name: Build (xcodebuild — raw log for diagnosis)
+        run: |
+          set -o pipefail
+          # Load scheme
+          scheme=$(cat default)
+
+          # Detect workspace or project file in repo root
+          if [ "`ls -A | grep -i \\.xcworkspace$ || true`" ]; then
+            filetype_parameter="workspace"
+            file_to_build="`ls -A | grep -i \\.xcworkspace$ | head -n1`"
+          else
+            filetype_parameter="project"
+            file_to_build="`ls -A | grep -i \\.xcodeproj$ | head -n1`"
+          fi
+          file_to_build=$(echo "$file_to_build" | awk '{$1=$1;print}')
+
+          echo "Building scheme: $scheme (type: $filetype_parameter file: $file_to_build)"
+
+          # Resolve SPM packages if used
+          xcodebuild -"$filetype_parameter" "$file_to_build" -scheme "$scheme" -resolvePackageDependencies
+
+          # Build + Analyze for simulator. Write raw output to a log file so we can see full errors.
+          # Use an explicit simulator destination to avoid code signing / device issues on CI.
+          xcodebuild clean build analyze \
+            -"$filetype_parameter" "$file_to_build" \
+            -scheme "$scheme" \
+            -sdk iphonesimulator \
+            -destination 'platform=iOS Simulator,name=iPhone SE (3rd generation),OS=latest' \
+            | tee xcodebuild.log
+
+          # Print out the log (first N lines are usually sufficient). Keep full log as artifact if needed.
+          sed -n '1,4000p' xcodebuild.log
+
+          # Exit with xcodebuild's exit code
+          exit ${PIPESTATUS[0]}
