@@ -21,8 +21,9 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
             HStack {
                 Text("Net Mode: ")
                 Picker("Net Mode", selection: $netMode) {
-                    Text("Self Test").tag(NetMode.selfTest)
+                    Text("3D View").tag(NetMode.net3d)
                     Text("Data Collection").tag(NetMode.dataCollection)
+                    Text("Self Test").tag(NetMode.selfTest)
                     Text("IMU Readings").tag(NetMode.imu)
                     Text("EMG Readings").tag(NetMode.emg)
                 }
@@ -31,18 +32,11 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
             HStack {
                 Button(action: {
                     switch netMode {
-                    case .selfTest:
-                        app.net.path.append(NetViewRoute.selfTest)
-                        break
-                    case .dataCollection:
-                        app.net.path.append(NetViewRoute.dataCollection)
-                        break
-                    case .imu:
-                        app.net.path.append(NetViewRoute.imu)
-                        break
-                    case .emg:
-                        app.net.path.append(NetViewRoute.emg)
-                        break
+                    case .selfTest: app.net.path.append(NetViewRoute.selfTest)
+                    case .dataCollection: app.net.path.append(NetViewRoute.dataCollection)
+                    case .imu: app.net.path.append(NetViewRoute.imu)
+                    case .emg: app.net.path.append(NetViewRoute.emg)
+                    case .net3d: app.net.path.append(NetViewRoute.net3d)
                     }
                 }) {
                     Text("Start Net")

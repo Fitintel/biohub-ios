@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum NetMode { case selfTest, dataCollection, imu, emg }
+enum NetMode { case selfTest, dataCollection, imu, emg, net3d }
 
 @Observable
 public class PollingNetMode<B: PBiodyn, BDiscovery: PeripheralsDiscovery<B>, D: Segmentable>

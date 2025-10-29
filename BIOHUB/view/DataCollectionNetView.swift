@@ -64,8 +64,7 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
             }.padding()
             List($app.fitnet.biodyns, id: \.uuid.uuidString) { $biodyn in
                 VStack {
-//                    DatedSIMD3LineChart(max: 30, data: dNet.dataFor(biodyn).imu.planar)
-                    BiodynView3D<B, BD>(biodyn: $biodyn)
+                    DatedSIMD3LineChart(max: 30, data: dNet.dataFor(biodyn).imu.planar)
                 }
             }
         }
