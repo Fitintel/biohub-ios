@@ -13,15 +13,21 @@ import Observation
 struct BiodynView3D<B: PBiodyn, BD: PeripheralsDiscovery<B>>: View
 where BD.Listener == any PeripheralsDiscoveryListener<B> {
     
-    @Binding var biodyn: B
+    @Bindable var biodyn: Biodyn3D<B, BD>
     
     var body: some View {
-        BiodynView3DSK().ignoresSafeArea().frame(height: 100)
+        BiodynView3DSK(biodyn: biodyn).ignoresSafeArea().frame(height: 400)
     }
     
 }
 
-fileprivate struct BiodynView3DSK: UIViewRepresentable {
+fileprivate struct BiodynView3DSK<B: PBiodyn, BD: PeripheralsDiscovery<B>>:  UIViewRepresentable
+where BD.Listener == any PeripheralsDiscoveryListener<B> {
+    
+    @Bindable var biodyn: Biodyn3D<B, BD>
+    @State var boxNode: SCNNode = SCNNode(geometry: SCNBox(width: 0.3, height: 0.3, length: 0.3, chamferRadius: 0.01))
+    @State var cameraNode: SCNNode = SCNNode()
+    
     func makeUIView(context: Context) -> SCNView {
         let view = SCNView()
         let scene = SCNScene()
@@ -30,9 +36,7 @@ fileprivate struct BiodynView3DSK: UIViewRepresentable {
         view.backgroundColor = .black
         
         // Add box
-        let box = SCNBox(width: 0.2, height: 0.2, length: 0.2, chamferRadius: 0.01)
-        box.firstMaterial?.diffuse.contents = UIColor.systemTeal
-        let boxNode = SCNNode(geometry: box)
+        boxNode.geometry?.firstMaterial?.diffuse.contents = UIColor.systemTeal
         scene.rootNode.addChildNode(boxNode)
         
         // Add light
@@ -46,17 +50,18 @@ fileprivate struct BiodynView3DSK: UIViewRepresentable {
         // Add camera
         let camera = SCNCamera()
         camera.zFar = 100
-        let cameraNode = SCNNode()
         cameraNode.camera = camera
         cameraNode.position = SCNVector3(0, 0, 2.0)
         scene.rootNode.addChildNode(cameraNode)
         
-        // Spin animation for now
-        let spin = SCNAction.repeatForever(.rotateBy(x: 0, y: CGFloat.pi, z: 0, duration: 2))
-        boxNode.runAction(spin)
-        
         return view
     }
     
-    func updateUIView(_ uiView: SCNView, context: Context) {}
+    func updateUIView(_ uiView: SCNView, context: Context) {
+        boxNode.simdPosition.x = biodyn.position.x
+        boxNode.simdPosition.y = biodyn.position.z
+        boxNode.simdPosition.z = biodyn.position.y
+        cameraNode.simdPosition.y = biodyn.position.z
+        log.info("[3DBiodynView] Biodyn at \(boxNode.simdPosition), camera at \(cameraNode.simdPosition)")
+    }
 }

@@ -17,13 +17,38 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
     public var body: some View {
         VStack {
             Text("3D Net View")
-            List($app.fitnet.biodyns, id: \.uuid.uuidString) { $biodyn in
+            HStack {
+                Button(role: .destructive, action: {
+                    net.stopPolling()
+                    let _ = app.net.path.popLast()
+                }) {
+                    Text("Back")
+                }
+                Spacer()
+                Button(action: {
+                    net.startPolling()
+                }) {
+                    Text("Start")
+                }
+                Spacer()
+                Button(action: {
+                    net.resetPositions()
+                }) {
+                    Text("Reset")
+                }
+                Spacer()
+                Button(action: {
+                    net.stopPolling()
+                }) {
+                    Text("Stop")
+                }
+            }.padding()
+            List(Array(net.b3ds.values), id: \.biodyn.uuid.uuidString) { b3d in
                 VStack {
-                    Text("Biodyn \(biodyn.deviceInfoService.systemIdStr ?? "?")")
-                    BiodynView3D<B, BD>(biodyn: $biodyn)
+                    Text("Biodyn \(b3d.biodyn.deviceInfoService.systemIdStr ?? "?")")
+                    BiodynView3D<B, BD>(biodyn: b3d)
                 }
             }
         }
     }
-    
 }
