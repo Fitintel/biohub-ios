@@ -58,6 +58,9 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
     }
     
     func updateUIView(_ uiView: SCNView, context: Context) {
+        boxNode.simdEulerAngles.x = biodyn.angle.x
+        boxNode.simdEulerAngles.y = biodyn.angle.y
+        boxNode.simdEulerAngles.z = biodyn.angle.z
         boxNode.simdPosition.x = biodyn.position.x
         boxNode.simdPosition.y = biodyn.position.z
         boxNode.simdPosition.z = biodyn.position.y

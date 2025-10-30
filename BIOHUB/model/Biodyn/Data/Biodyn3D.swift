@@ -17,6 +17,8 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
     public private(set)var position = SIMD3<Float>(0,0,0)
     public private(set)var velocity = SIMD3<Float>(0,0,0)
     public private(set)var accel = SIMD3<Float>(0,0,0)
+    public private(set)var angle = SIMD3<Float>(0,0,0)
+    public private(set)var angularVelocity = SIMD3<Float>(0,0,0)
     
     public init(_ biodyn: B) {
         self.biodyn = biodyn
@@ -24,13 +26,16 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
     
     public func calcPosition() {
         if let planar = biodyn.dfService.planarAccel {
+            let gyro = biodyn.dfService.gyroAccel!
             let lastIdx = planar.list.count - 1
             if lastIdx >= 1 { // need enough data
                 let elapsed = planar.list[lastIdx].readTime.timeIntervalSince(planar.list[lastIdx-1].readTime)
                 accel = (planar.list[lastIdx].read + planar.list[lastIdx-1].read) / 2
                 velocity += accel * Float(elapsed)
                 position += velocity * Float(elapsed)
-                velocity *= 0.92 // Damping
+                
+                angularVelocity = ((gyro.list[lastIdx].read + gyro.list[lastIdx-1].read) / 2) * Float.pi / 360.0
+                angle += angularVelocity * Float(elapsed)
             }
         }
     }

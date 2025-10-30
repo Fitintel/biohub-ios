@@ -15,40 +15,37 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
     @Bindable var net: Net3DMode<B, BD>
     
     public var body: some View {
-        VStack {
-            Text("3D Net View")
-            HStack {
-                Button(role: .destructive, action: {
-                    net.stopPolling()
-                    let _ = app.net.path.popLast()
-                }) {
-                    Text("Back")
-                }
-                Spacer()
-                Button(action: {
-                    net.startPolling()
-                }) {
-                    Text("Start")
-                }
-                Spacer()
-                Button(action: {
-                    net.resetPositions()
-                }) {
-                    Text("Reset")
-                }
-                Spacer()
-                Button(action: {
-                    net.stopPolling()
-                }) {
-                    Text("Stop")
-                }
-            }.padding()
-            List(Array(net.b3ds.values), id: \.biodyn.uuid.uuidString) { b3d in
-                VStack {
-                    Text("Biodyn \(b3d.biodyn.deviceInfoService.systemIdStr ?? "?")")
-                    BiodynView3D<B, BD>(biodyn: b3d)
+        NavigationView {
+            VStack {
+                HStack {
+                    Button(role: .destructive, action: {
+                        net.stopPolling()
+                        let _ = app.net.path.popLast()
+                    }) {
+                        Text("Back")
+                    }
+                    Spacer()
+                    Button(action: {
+                        net.isPolling ? net.stopPolling() : net.startPolling()
+                    }) {
+                        Text(net.isPolling ? "Stop" : "Start")
+                    }
+                    Spacer()
+                    Button(action: {
+                        net.resetPositions()
+                    }) {
+                        Text("Reset Position")
+                    }
+                }.padding()
+                List(Array(net.b3ds.values), id: \.biodyn.uuid.uuidString) { b3d in
+                    VStack {
+                        Text("Biodyn \(b3d.biodyn.deviceInfoService.systemIdStr ?? "?")")
+                        BiodynView3D<B, BD>(biodyn: b3d)
+                    }
                 }
             }
         }
+        .navigationTitle("3D View")
+        .navigationBarBackButtonHidden()
     }
 }
