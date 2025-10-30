@@ -11,7 +11,7 @@ struct ConfigureNetView<B: PBiodyn, BD: PeripheralsDiscovery<B>>: View
 where BD.Listener == any PeripheralsDiscoveryListener<B> {
     
     @Bindable var app: AppState<B, BD>
-    @State private var netMode = NetMode.selfTest
+    @State private var netMode = NetMode.net3d
     @State private var confirmRecreateNet = false
     @State private var netModeStarted = false
     

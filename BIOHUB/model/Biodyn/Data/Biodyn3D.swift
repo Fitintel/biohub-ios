@@ -34,7 +34,7 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
                 velocity += accel * Float(elapsed)
                 position += velocity * Float(elapsed)
                 
-                angularVelocity = ((gyro.list[lastIdx].read + gyro.list[lastIdx-1].read) / 2) * Float.pi / 360.0
+                angularVelocity = ((gyro.list[lastIdx].read + gyro.list[lastIdx-1].read) / 2) * 2 * Float.pi / 360.0
                 angle += angularVelocity * Float(elapsed)
             }
         }
@@ -44,6 +44,8 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
         accel = SIMD3<Float>()
         velocity = SIMD3<Float>()
         position = SIMD3<Float>()
+        angle = SIMD3<Float>()
+        angularVelocity = SIMD3<Float>()
     }
     
 }

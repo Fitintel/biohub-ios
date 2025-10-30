@@ -50,6 +50,7 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
         // Add camera
         let camera = SCNCamera()
         camera.zFar = 100
+        camera.zNear = 0.05
         cameraNode.camera = camera
         cameraNode.position = SCNVector3(0, 0, 2.0)
         scene.rootNode.addChildNode(cameraNode)
@@ -58,9 +59,9 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
     }
     
     func updateUIView(_ uiView: SCNView, context: Context) {
-        boxNode.simdEulerAngles.x = biodyn.angle.x
-        boxNode.simdEulerAngles.y = biodyn.angle.y
-        boxNode.simdEulerAngles.z = biodyn.angle.z
+        boxNode.simdEulerAngles.x = biodyn.angle.y
+        boxNode.simdEulerAngles.y = biodyn.angle.z
+        boxNode.simdEulerAngles.z = biodyn.angle.x
         boxNode.simdPosition.x = biodyn.position.x
         boxNode.simdPosition.y = biodyn.position.z
         boxNode.simdPosition.z = biodyn.position.y
