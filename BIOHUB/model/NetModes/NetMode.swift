@@ -20,10 +20,12 @@ where BDiscovery.Listener == any PeripheralsDiscoveryListener<B>,
    
     public var dataMap = Dictionary<UUID, D>()
     private var pollTask: Task<Void, Never>? = nil
+    public let heartbeat: Heartbeat<B, BDiscovery>
     
     init(name: String, fitnet: Fitnet<B, BDiscovery>) {
         self.fitnet = fitnet
         self.tag = name
+        self.heartbeat = Heartbeat(fitnet)
         for biodyn in fitnet.biodyns {
             dataMap.updateValue(D(), forKey: biodyn.uuid)
         }
@@ -33,6 +35,8 @@ where BDiscovery.Listener == any PeripheralsDiscoveryListener<B>,
     open func readAsync() async {
         log.error("UNIMPLEMENTED POLL NET MODE")
     }
+    
+    open func initAsync() async {}
 
     public func dataFor(_ biodyn: B) -> D {
         return self.ensureStream(biodyn)
@@ -59,6 +63,7 @@ where BDiscovery.Listener == any PeripheralsDiscoveryListener<B>,
     public func startPolling() {
         log.info("[\(self.tag)] Starting polling")
         self.pollTask = Task {
+            await heartbeat.optimizeRTT()
             await self.initAsync()
             let interval: Duration = .milliseconds(5)
             while !Task.isCancelled {
@@ -70,8 +75,6 @@ where BDiscovery.Listener == any PeripheralsDiscoveryListener<B>,
             }
         }
     }
-    
-    open func initAsync() async {}
     
     public func stopPolling() {
         log.info("[\(self.tag)] Stopping polling")

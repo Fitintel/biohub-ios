@@ -65,6 +65,7 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
         boxNode.simdPosition.x = biodyn.position.x
         boxNode.simdPosition.y = biodyn.position.z
         boxNode.simdPosition.z = biodyn.position.y
+        
         cameraNode.simdPosition.y = biodyn.position.z
         log.info("[3DBiodynView] Biodyn at \(boxNode.simdPosition), camera at \(cameraNode.simdPosition)")
     }

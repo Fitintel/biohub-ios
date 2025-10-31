@@ -23,7 +23,7 @@ public class Heartbeat<B: PBiodyn, BDiscovery: PeripheralsDiscovery<B>>
             for b in fitnet.biodyns {
                 group.addTask {
                     // Measure average error
-                    let measurements = 15
+                    let measurements = 7
                     let avgErr = RollingAverage(keepCount: measurements)
                     for _ in 0...(measurements - 1) {
                         await b.dfService.readTicker()
@@ -50,6 +50,7 @@ public class Heartbeat<B: PBiodyn, BDiscovery: PeripheralsDiscovery<B>>
                 }
             }
         }
+        log.info("[\(self.tag)] Optimized RTT")
     }
     
     public func tickerError(_ b: B) -> Int64 {

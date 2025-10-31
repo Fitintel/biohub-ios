@@ -11,18 +11,10 @@ import Observation
 public class DataCollectionNetMode<B: PBiodyn, BDiscovery: PeripheralsDiscovery<B>> : PollingNetMode<B, BDiscovery, FullDataStream>
 where BDiscovery.Listener == any PeripheralsDiscoveryListener<B> {
     
-    public let heartbeat: Heartbeat<B, BDiscovery>
     public let capacity = RollingAverage(keepCount: 50)
     
     init(_ fitnet: Fitnet<B, BDiscovery>) {
-        self.heartbeat = Heartbeat(fitnet)
         super.init(name: "DataCollectionNetMode", fitnet: fitnet)
-    }
-    
-    override public func initAsync() async {
-        for biodyn in fitnet.biodyns {
-            // TODO: set ticker
-        }
     }
     
     public override func readAsync() async {
