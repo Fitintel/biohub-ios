@@ -9,6 +9,7 @@ import SwiftUI
 import SceneKit
 import simd
 import Observation
+import SceneKit.ModelIO
 
 struct BiodynView3D<B: PBiodyn, BD: PeripheralsDiscovery<B>>: View
 where BD.Listener == any PeripheralsDiscoveryListener<B> {
@@ -25,7 +26,7 @@ fileprivate struct BiodynView3DSK<B: PBiodyn, BD: PeripheralsDiscovery<B>>:  UIV
 where BD.Listener == any PeripheralsDiscoveryListener<B> {
     
     @Bindable var biodyn: Biodyn3D<B, BD>
-    @State var boxNode: SCNNode = SCNNode(geometry: SCNBox(width: 0.3, height: 0.3, length: 0.3, chamferRadius: 0.01))
+    @State var boxNode: SCNNode = loadSTLModel(named: "BIODYN-100 v3")!
     @State var cameraNode: SCNNode = SCNNode()
     
     func makeUIView(context: Context) -> SCNView {
@@ -36,7 +37,6 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
         view.backgroundColor = .black
         
         // Add box
-        boxNode.geometry?.firstMaterial?.diffuse.contents = UIColor.systemTeal
         scene.rootNode.addChildNode(boxNode)
         
         // Add light
@@ -66,7 +66,26 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
         boxNode.simdPosition.y = biodyn.position.z
         boxNode.simdPosition.z = biodyn.position.y
         
-        cameraNode.simdPosition.y = biodyn.position.z
+        cameraNode.simdPosition = boxNode.simdPosition + simd_float3(0, 0, 2.0)
         log.info("[3DBiodynView] Biodyn at \(boxNode.simdPosition), camera at \(cameraNode.simdPosition)")
+    }
+    
+    static func loadSTLModel(named filename: String) -> SCNNode? {
+        guard let url = Bundle.main.url(forResource: filename, withExtension: "stl") else {
+            log.error("[3DBiodynView] 3MF file not found")
+            return nil
+        }
+        let asset = MDLAsset(url: url)
+
+        let scene = SCNScene(mdlAsset: asset)
+        let node = SCNNode()
+        for child in scene.rootNode.childNodes {
+            node.addChildNode(child)
+        }
+        node.simdScale = simd_float3(repeating: 0.01)
+        
+        log.info("[3DBiodynView] Loaded 3MF: \(filename)")
+        
+        return node
     }
 }
