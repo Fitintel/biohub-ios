@@ -12,7 +12,11 @@ public class DataCollectionNetMode<B: PBiodyn, BDiscovery: PeripheralsDiscovery<
 where BDiscovery.Listener == any PeripheralsDiscoveryListener<B> {
     
     public let capacity = RollingAverage(keepCount: 50)
-    
+    public let maxPlanarAccel: Float = 30 // m/s^2
+    public let maxGyroAccel: Float = 720 // deg/s
+    public let maxEmg: Float = 6
+    public let maxMagnetometer: Float = 200 // uT
+
     init(_ fitnet: Fitnet<B, BDiscovery>) {
         super.init(name: "DataCollectionNetMode", fitnet: fitnet)
     }

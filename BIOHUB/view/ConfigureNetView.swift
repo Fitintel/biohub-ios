@@ -24,8 +24,6 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
                     Text("3D View").tag(NetMode.net3d)
                     Text("Data Collection").tag(NetMode.dataCollection)
                     Text("Self Test").tag(NetMode.selfTest)
-                    Text("IMU Readings").tag(NetMode.imu)
-                    Text("EMG Readings").tag(NetMode.emg)
                 }
                 Spacer()
             }.padding(.horizontal)
@@ -34,8 +32,6 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
                     switch netMode {
                     case .selfTest: app.net.path.append(NetViewRoute.selfTest)
                     case .dataCollection: app.net.path.append(NetViewRoute.dataCollection)
-                    case .imu: app.net.path.append(NetViewRoute.imu)
-                    case .emg: app.net.path.append(NetViewRoute.emg)
                     case .net3d: app.net.path.append(NetViewRoute.net3d)
                     }
                 }) {
