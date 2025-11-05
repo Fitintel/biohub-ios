@@ -67,7 +67,7 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
         boxNode.simdPosition.z = biodyn.position.y
         
         cameraNode.simdPosition = boxNode.simdPosition + simd_float3(0, 0, 2.0)
-        log.info("[3DBiodynView] Biodyn at \(boxNode.simdPosition), camera at \(cameraNode.simdPosition)")
+//        log.info("[3DBiodynView] Biodyn at \(boxNode.simdPosition), camera at \(cameraNode.simdPosition)")
     }
     
     static func loadSTLModel(named filename: String) -> SCNNode? {

@@ -23,11 +23,12 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
             VStack {
                 HStack {
                     Button(action: {
-                        dNet.isPolling ? dNet.stopPolling() : dNet.startPolling()
+                        dNet.stopPolling()
+                        dNet.reset()
+                        let _ = app.net.path.popLast()
                     }) {
-                        Text(dNet.isPolling ? "Stop Reading" : "Start Reading")
+                        Text("Back")
                     }
-                    .disabled(isUploading)
                     Spacer()
                     Picker("IMU Reading", selection: $imuGraph) {
                         Text("Planar Accel").tag(DataReadingType.planar)
@@ -39,13 +40,21 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
                 .padding()
                 HStack {
                     Button(action: {
+                        dNet.isPolling ? dNet.stopPolling() : dNet.startPolling()
+                    }) {
+                        Text(dNet.isPolling ? "Stop Reading" : "Start Reading")
+                    }
+                    Spacer()
+                        .disabled(isUploading)
+                    Button(action: {
                         dNet.reset()
                         isUploaded = false
                     }) {
                         Text("Clear Data")
                     }
                     .disabled(isUploading)
-                    Spacer()
+                }.padding(.horizontal)
+                HStack {
                     Button(action: {
                         isUploading = true
                         Task {
@@ -69,13 +78,12 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
                 HStack {
                     let takenAvgPct = Int((dNet.capacity.average ?? 0) * 100)
                     Text("Running at capacity: \(takenAvgPct)%")
-                }.padding()
+                }.padding(.horizontal)
                 List($app.fitnet.biodyns, id: \.uuid.uuidString) { $biodyn in
                     VStack {
                         HStack {
                             Text("\(biodyn.deviceInfoService.systemIdStr ?? "UNKNOWN") XYZ:")
-                        }
-                        .animation(nil, value: UUID())
+                        }.animation(nil, value: UUID())
                         switch imuGraph {
                         case .planar: DatedSIMD3LineChart(max: dNet.maxPlanarAccel, data: dNet.dataFor(biodyn).imu.planar)
                         case .gyro: DatedSIMD3LineChart(max: dNet.maxGyroAccel, data: dNet.dataFor(biodyn).imu.gyro)
