@@ -14,7 +14,7 @@ where BDiscovery.Listener == any PeripheralsDiscoveryListener<B> {
     
     public let maxPlanarAccel: Float = 30 // m/s^2
     public let maxGyroAccel: Float = 720 // deg/s
-    public let maxMagnetometer: Float = 5
+    public let maxMagnetometer: Float = 200 // uT
     public let avgReadDelay: Double = 0
     
     init(_ fitnet: Fitnet<B, BDiscovery>) {

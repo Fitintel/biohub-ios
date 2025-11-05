@@ -26,7 +26,7 @@ fileprivate struct BiodynView3DSK<B: PBiodyn, BD: PeripheralsDiscovery<B>>:  UIV
 where BD.Listener == any PeripheralsDiscoveryListener<B> {
     
     @Bindable var biodyn: Biodyn3D<B, BD>
-    @State var boxNode: SCNNode = loadSTLModel(named: "BIODYN-100 v3")!
+    @State var boxNode: SCNNode = SCNNode(geometry: SCNBox(width: 0.3, height: 0.3, length: 0.3, chamferRadius: 0.01)) // loadSTLModel(named: "BIODYN-100 v3")!
     @State var cameraNode: SCNNode = SCNNode()
     
     func makeUIView(context: Context) -> SCNView {
@@ -72,7 +72,7 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
     
     static func loadSTLModel(named filename: String) -> SCNNode? {
         guard let url = Bundle.main.url(forResource: filename, withExtension: "stl") else {
-            log.error("[3DBiodynView] 3MF file not found")
+            log.error("[3DBiodynView] STL file not found")
             return nil
         }
         let asset = MDLAsset(url: url)

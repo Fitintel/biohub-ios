@@ -30,6 +30,10 @@ public class Heartbeat<B: PBiodyn, BDiscovery: PeripheralsDiscovery<B>>
                         guard let tickErrMs = b.dfService.tickerErrorMs else { continue }
                         avgErr.add(tickErrMs)
                     }
+                    guard avgErr.average != nil else {
+                        log.error("[\(self.tag)] Did not get any readings to tune heartbeat")
+                        return
+                    }
 
                     // Re-read the info we want
                     await b.dfService.readRTT()
