@@ -11,6 +11,7 @@ XCode
 - CoreBluetooth
 - Synchronization
 - Charts
+- SceneKit
 
 Firebase
 - Firestore
