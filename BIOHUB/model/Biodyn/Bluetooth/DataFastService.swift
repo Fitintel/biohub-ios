@@ -11,17 +11,17 @@ import CoreBluetooth
 
 @Observable
 public class DataFastService: FitnetBLEService, PDataFastService {
-    
     private static let SERVICE_UUID = CBUUID(data: Data([UInt8]([0x14, 0x32])))
     private static let COLLECTIVE_UUID = CBUUID(data: Data([UInt8]([0x41, 0x53])))
     private static let PACKED_COLLECTIVE_UUID = CBUUID(data: Data([UInt8]([0x41, 0x55])))
     private static let HEARTBEAT_UUID = CBUUID(data: Data([UInt8]([0x41, 0x57])))
     private static let RTT_UUID = CBUUID(data: Data([UInt8]([0x41, 0x58])))
     
-    public var emg: DatedFloatList? // TODO: me
+    public var emg: DatedFloatList?
     public var planarAccel: DatedFloat3List? { get { packedChar.planar } }
     public var gyroAccel: DatedFloat3List? { get { packedChar.gyro } }
     public var magnetometer: DatedFloat3List? { get { packedChar.mag } }
+    public var orientation: DatedFloat4List? { get { packedChar.orient } }
     public var ticker: UInt64? {
         get {
             if tickerChar.value == nil || rttChar.value == nil { return nil }
@@ -82,6 +82,7 @@ public class DataFastService: FitnetBLEService, PDataFastService {
         var gyro: DatedFloat3List?
         var mag: DatedFloat3List?
         var emg: DatedFloatList?
+        var orient: DatedFloat4List?
         
         init(_ peripheral: CBPeripheral) {
             super.init(peripheral, "Packed Collective", COLLECTIVE_UUID)
@@ -101,12 +102,14 @@ public class DataFastService: FitnetBLEService, PDataFastService {
             var gyro: [DatedFloat3] = []
             var mag: [DatedFloat3] = []
             var newEmg: [DatedFloat] = []
+            var newOrient: [DatedFloat4] = []
             var readTime: Date?
             
-            let numFloats = 12 // 48 bytes
+            let numFloats = 16 // 64 bytes
             let tickerStart = 0 // 0 byte offset
             let imuMotionDataStart = 2 // 8 byte offset
             let emgStart = 11 // 44 byte offset
+            let orientStart = 12 // After emg, 48 byte offset
             if floatArray.count % numFloats != 0 {
                 log.error("[DataFast] INCORRECT READ COUNT")
             }
@@ -122,13 +125,15 @@ public class DataFastService: FitnetBLEService, PDataFastService {
                     mag.append(DatedFloat3(readTime: readTime!, read: SIMD3<Float>(floatArray[i-2], floatArray[i-1], floatArray[i])))
                 } else if i % numFloats == emgStart { // This is EMG
                     newEmg.append(DatedFloat(readTime: readTime!, read: floatArray[i]))
+                } else if i % numFloats == orientStart + 3 { // Last 4 floats are orientation quaternion
+                    newOrient.append(DatedFloat4(readTime: readTime!, read: SIMD4<Float>(floatArray[i-3], floatArray[i-2], floatArray[i-1], floatArray[i])))
                 }
             }
             self.planar = DatedFloat3List(planar)
             self.gyro = DatedFloat3List(gyro)
             self.mag = DatedFloat3List(mag)
             self.emg = DatedFloatList(newEmg)
-//            log.info("[\(self.name)] Read \(self.planar!.list.count) new datapoints")
+            self.orient = DatedFloat4List(newOrient)
         }
         
         public override func writeValueAsync(data: Data, timeout: Duration) async -> BleWriteResult {

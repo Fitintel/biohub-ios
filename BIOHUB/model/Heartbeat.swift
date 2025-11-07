@@ -18,12 +18,11 @@ public class Heartbeat<B: PBiodyn, BDiscovery: PeripheralsDiscovery<B>>
         self.fitnet = fitnet
     }
     
-    public func optimizeRTT() async {
+    public func optimizeRTT(measurements: Int = 6) async {
         await withTaskGroup(of: Void.self) { group in
             for b in fitnet.biodyns {
                 group.addTask {
                     // Measure average error
-                    let measurements = 7
                     let avgErr = RollingAverage(keepCount: measurements)
                     for _ in 0...(measurements - 1) {
                         await b.dfService.readTicker()
@@ -39,9 +38,10 @@ public class Heartbeat<B: PBiodyn, BDiscovery: PeripheralsDiscovery<B>>
                     await b.dfService.readRTT()
                     
                     // Hard-set if we're super far
-                    if abs(avgErr.average!) > 15 {
-                        await b.dfService.writeRTT(b.avgReadDelay?.msToTicks() ?? 60_000)
+                    if abs(avgErr.average!) > 500 {
+                        await b.dfService.writeRTT(b.avgReadDelay?.msToTicks() ?? 45_000)
                         log.info("[\(self.tag)] hard setting")
+                        await self.optimizeRTT(measurements: 3) // Retry to reduce error
                     } else if abs(avgErr.average!) > 2 {
                         guard let rttBeforeTicks = b.dfService.rtt else { return }
                         let rttBeforeMs = Double(rttBeforeTicks) / 1000.0

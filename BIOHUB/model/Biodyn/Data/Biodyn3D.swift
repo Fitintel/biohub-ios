@@ -19,6 +19,7 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
     public private(set)var accel = SIMD3<Float>(0,0,0)
     public private(set)var angle = SIMD3<Float>(0,0,0)
     public private(set)var angularVelocity = SIMD3<Float>(0,0,0)
+    public private(set)var orientation = SIMD4<Float>(1,0,0,0)
     public private(set)var mag = SIMD3<Float>(0,0,0)
     public private(set)var emg = Float(0)
     
@@ -50,6 +51,11 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
                 accel = accelNotNorm - (normalize(mag) * 9.81) // Account for gravity
                 velocity += accel * Float(elapsed)
                 position += velocity * Float(elapsed)
+            }
+        }
+        if let orient = biodyn.dfService.orientation {
+            if let last = orient.list.last {
+                self.orientation = last.read
             }
         }
     }

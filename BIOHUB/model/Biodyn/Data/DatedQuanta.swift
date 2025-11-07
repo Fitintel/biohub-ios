@@ -13,6 +13,10 @@ public typealias DatedFloat3 = DatedQuanta<SIMD3<Float>>
 public typealias DatedFloat3List = DatedQList<SIMD3<Float>>
 public typealias DatedFloat3Segments = DatedQSegments<SIMD3<Float>>
 
+public typealias DatedFloat4 = DatedQuanta<SIMD4<Float>>
+public typealias DatedFloat4List = DatedQList<SIMD4<Float>>
+public typealias DatedFloat4Segments = DatedQSegments<SIMD4<Float>>
+
 public typealias DatedFloat = DatedQuanta<Float>
 public typealias DatedFloatList = DatedQList<Float>
 public typealias DatedFloatSegments = DatedQSegments<Float>

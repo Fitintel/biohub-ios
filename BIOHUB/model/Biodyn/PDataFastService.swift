@@ -13,6 +13,7 @@ public protocol PDataFastService: Observable {
     var planarAccel: DatedFloat3List? { get }
     var gyroAccel: DatedFloat3List? { get }
     var magnetometer: DatedFloat3List? { get }
+    var orientation: DatedFloat4List? { get }
     var ticker: UInt64? { get }
     var tickerError: Int64? { get }
     var rtt: UInt64? { get }

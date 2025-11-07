@@ -59,16 +59,19 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
     }
     
     func updateUIView(_ uiView: SCNView, context: Context) {
-        boxNode.simdEulerAngles.x = biodyn.angle.y
-        boxNode.simdEulerAngles.y = biodyn.angle.z
-        boxNode.simdEulerAngles.z = biodyn.angle.x
-        boxNode.simdPosition.x = biodyn.position.x
-        boxNode.simdPosition.y = biodyn.position.z
-        boxNode.simdPosition.z = biodyn.position.y
+//        boxNode.simdEulerAngles.x = biodyn.angle.y
+//        boxNode.simdEulerAngles.y = biodyn.angle.z
+//        boxNode.simdEulerAngles.z = biodyn.angle.x
+//        boxNode.simdPosition.x = biodyn.position.x
+//        boxNode.simdPosition.y = biodyn.position.z
+//        boxNode.simdPosition.z = biodyn.position.y
+        let q = biodyn.orientation
+        boxNode.simdOrientation = simd_quatf(ix: q.x, iy: q.y, iz: q.z, r: q.w)
         boxNode.geometry?.firstMaterial?.diffuse.contents = UIColor(red: CGFloat(biodyn.emg / 5.0), green: 1, blue: 0, alpha: 1.0)
         
         cameraNode.simdPosition = boxNode.simdPosition + simd_float3(0, 0, 2.0)
 //        log.info("[3DBiodynView] Biodyn at \(boxNode.simdPosition), camera at \(cameraNode.simdPosition)")
+        log.info("[3DBiodynView] Oriented: \(biodyn.orientation)")
     }
     
     static func loadSTLModel(named filename: String) -> SCNNode? {
