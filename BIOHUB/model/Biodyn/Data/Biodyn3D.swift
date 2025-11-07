@@ -27,19 +27,23 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
     }
     
     public func calcPosition() {
+        if let emgList = biodyn.dfService.emg {
+            let lastIdx = emgList.list.count - 1
+            if lastIdx >= 1 { // Need 2 datapoints to take the average
+                emg = (emgList.list[lastIdx].read + emgList.list[lastIdx-1].read) / 2.0
+            }
+        }
         if let planar = biodyn.dfService.planarAccel {
             let gyro = biodyn.dfService.gyroAccel!
             let magList = biodyn.dfService.magnetometer!
-            let emgList = biodyn.dfService.emg!
             
             let lastIdx = planar.list.count - 1
             if lastIdx >= 1 { // Need 2 datapoints to take the average
                 let elapsed = planar.list[lastIdx].readTime.timeIntervalSince(planar.list[lastIdx-1].readTime)
                 
                 mag = (magList.list[lastIdx].read + magList.list[lastIdx-1].read) / 2.0
-                emg = (emgList.list[lastIdx].read + emgList.list[lastIdx-1].read) / 2.0
                 
-                angularVelocity = ((gyro.list[lastIdx].read + gyro.list[lastIdx-1].read) / 2) * 2 * Float.pi / 360.0
+                angularVelocity = ((gyro.list[lastIdx].read + gyro.list[lastIdx-1].read) / 2) * 2 * Float.pi / 90.0
                 angle += angularVelocity * Float(elapsed)
 
                 let accelNotNorm = (planar.list[lastIdx].read + planar.list[lastIdx-1].read) / 2.0
