@@ -16,7 +16,7 @@ where BDiscovery.Listener == any PeripheralsDiscoveryListener<B> {
     public let maxGyroAccel: Float = 720 // deg/s
     public let maxEmg: Float = 6
     public let maxMagnetometer: Float = 200 // uT
-
+    
     init(_ fitnet: Fitnet<B, BDiscovery>) {
         super.init(name: "DataCollectionNetMode", fitnet: fitnet)
     }
@@ -29,26 +29,30 @@ where BDiscovery.Listener == any PeripheralsDiscoveryListener<B> {
                     
                     let stream = self.ensureStream(biodyn)
                     
-                    if biodyn.dfService.emg != nil {
-                        stream.emg.addAll(biodyn.dfService.emg!)
+                    if let emg = biodyn.dfService.emg {
+                        stream.emg.addAll(emg) // Add emg data
                     }
                     
-                    if biodyn.dfService.planarAccel != nil {
+                    if let planar = biodyn.dfService.planarAccel {
                         let beforeCnt = stream.imu.planar.latest.list.count
-                        stream.imu.addAllPlanar(biodyn.dfService.planarAccel!) // Add planar data
+                        stream.imu.addAllPlanar(planar) // Add planar data
                         let afterCnt = stream.imu.planar.latest.list.count
-                        let canTake = biodyn.dfService.planarAccel!.list.count
+                        let canTake = planar.list.count
                         Task { @MainActor in
                             self.capacity.add(Double(afterCnt - beforeCnt) / Double(canTake)) // Add point difference to read avg taken
                         }
                     }
                     
-                    if biodyn.dfService.gyroAccel != nil {
-                        stream.imu.addAllGyro(biodyn.dfService.gyroAccel!) // Add gyro data
+                    if let gyro = biodyn.dfService.gyroAccel {
+                        stream.imu.addAllGyro(gyro) // Add gyro data
                     }
                     
-                    if biodyn.dfService.magnetometer != nil {
-                        stream.imu.addAllMag(biodyn.dfService.magnetometer!) // Add mag data
+                    if let mag = biodyn.dfService.magnetometer {
+                        stream.imu.addAllMag(mag) // Add mag data
+                    }
+                    
+                    if let orient = biodyn.dfService.orientation {
+                        stream.imu.addAllOrientation(orient) // Add orientation data
                     }
                 }
             }

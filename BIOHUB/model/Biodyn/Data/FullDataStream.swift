@@ -26,5 +26,17 @@ public class FullDataStream: Encodable, Decodable, Segmentable, DefaultInit {
         emg.reset()
     }
     
-
+    private enum CodingKeys: String, CodingKey { case emg, imu }
+    public required init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.imu = try container.decode(IMUDataStream.self, forKey: .imu)
+        self.emg = try container.decode(FloatDataStream.self, forKey: .emg)
+    }
+    public func encode(to encoder: any Encoder) throws {
+        var c = encoder.container(keyedBy: CodingKeys.self)
+        try c.encode(self.emg, forKey: .emg)
+        try c.encode(self.imu, forKey: .imu)
+    }
+    
+    
 }
