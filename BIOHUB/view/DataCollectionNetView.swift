@@ -43,16 +43,15 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
                         dNet.isPolling ? dNet.stopPolling() : dNet.startPolling()
                     }) {
                         Text(dNet.isPolling ? "Stop Reading" : "Start Reading")
-                    }
+                    }.disabled(dNet.isConfiguringDevices || isUploading)
                     Spacer()
-                        .disabled(isUploading)
                     Button(action: {
                         dNet.reset()
                         isUploaded = false
                     }) {
                         Text("Clear Data")
                     }
-                    .disabled(isUploading)
+                    .disabled(isUploading || dNet.isConfiguringDevices)
                 }.padding(.horizontal)
                 HStack {
                     Button(action: {
@@ -69,12 +68,18 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
                     }) {
                         Text(isUploaded ? "Data Uploaded" : (app.isLoggedIn ? "Save Session" : "Log In to Save"))
                     }
-                    .disabled(!app.isLoggedIn || dNet.isPolling || isUploading || isUploaded)
+                    .disabled(!app.isLoggedIn || dNet.isPolling || isUploading || isUploaded || dNet.isConfiguringDevices)
                     if (isUploading) {
                         ProgressView()
                     }
                 }
                 .padding()
+                if dNet.isConfiguringDevices {
+                    HStack {
+                        Text("Configuring devices")
+                        ProgressView()
+                    }.padding(.horizontal)
+                }
                 HStack {
                     let takenAvgPct = Int((dNet.capacity.average ?? 0) * 100)
                     Text("Running at capacity: \(takenAvgPct)%")

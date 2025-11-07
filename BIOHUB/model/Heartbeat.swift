@@ -19,6 +19,17 @@ public class Heartbeat<B: PBiodyn, BDiscovery: PeripheralsDiscovery<B>>
     }
     
     public func optimizeRTT(measurements: Int = 6) async {
+        var ctr = 0
+        var keepOptimizing = true
+        while keepOptimizing && ctr < 9 {
+            keepOptimizing = await optimizeRTTInternal(measurements: measurements)
+            ctr += 1
+        }
+        log.info("[\(self.tag)] Optimized RTT with \(ctr) iterations")
+    }
+    
+    private func optimizeRTTInternal(measurements: Int) async -> Bool {
+        var reOptimize = false
         await withTaskGroup(of: Void.self) { group in
             for b in fitnet.biodyns {
                 group.addTask {
@@ -34,27 +45,32 @@ public class Heartbeat<B: PBiodyn, BDiscovery: PeripheralsDiscovery<B>>
                         return
                     }
 
+                    let absErr = abs(avgErr.average!)
+                    if absErr < 1.5 { return } // Shortcut if we're doing good
+                    reOptimize = absErr > 5 // If > 5 ms, re-optimize
+                    
                     // Re-read the info we want
                     await b.dfService.readRTT()
                     
+
                     // Hard-set if we're super far
-                    if abs(avgErr.average!) > 500 {
+                    if absErr > 500 {
                         await b.dfService.writeRTT(b.avgReadDelay?.msToTicks() ?? 45_000)
-                        log.info("[\(self.tag)] hard setting")
-                        await self.optimizeRTT(measurements: 3) // Retry to reduce error
-                    } else if abs(avgErr.average!) > 2 {
+                        await b.dfService.writeTicker(Date.currentFitnetTick())
+                        log.info("[\(self.tag)] Hard setting with error \(absErr)")
+                    } else if absErr > 2 { // If < 2ms we're good
                         guard let rttBeforeTicks = b.dfService.rtt else { return }
                         let rttBeforeMs = Double(rttBeforeTicks) / 1000.0
                         // Adjust by half error
                         let newRttMs = rttBeforeMs + (avgErr.average! / 2.0)
-                        log.info("[\(self.tag)] Shifting \(b.deviceInfoService.systemIdStr ?? "???") RTT \(String(format: "%.1f", rttBeforeMs))ms to \(String(format: "%.1f", newRttMs))ms")
+                        log.info("[\(self.tag)] Shifting \(b.deviceInfoService.systemIdStr ?? "???") RTT \(String(format: "%.1f", rttBeforeMs))ms to \(String(format: "%.1f", newRttMs))ms, error \(absErr)")
                         await b.dfService.writeRTT(newRttMs.msToTicks())
                         await b.dfService.writeTicker(Date.currentFitnetTick())
                     }
                 }
             }
         }
-        log.info("[\(self.tag)] Optimized RTT")
+        return reOptimize
     }
     
     public func tickerError(_ b: B) -> Int64 {

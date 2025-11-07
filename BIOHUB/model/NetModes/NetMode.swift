@@ -17,7 +17,9 @@ where BDiscovery.Listener == any PeripheralsDiscoveryListener<B>,
     public let tag: String
     public let fitnet: Fitnet<B, BDiscovery>
     public var isPolling: Bool { get { return pollTask != nil } }
-   
+    public var isConfiguringDevices: Bool = false
+    public var didConfigureDevices: Bool = false
+
     public var dataMap = Dictionary<UUID, D>()
     private var pollTask: Task<Void, Never>? = nil
     public let heartbeat: Heartbeat<B, BDiscovery>
@@ -63,8 +65,13 @@ where BDiscovery.Listener == any PeripheralsDiscoveryListener<B>,
     public func startPolling() {
         log.info("[\(self.tag)] Starting polling")
         self.pollTask = Task {
-            await heartbeat.optimizeRTT()
+            self.isConfiguringDevices = true
+            if !didConfigureDevices {
+                await heartbeat.optimizeRTT()
+            }
             await self.initAsync()
+            self.isConfiguringDevices = false
+            self.didConfigureDevices = true
             let interval: Duration = .milliseconds(5)
             while !Task.isCancelled {
                 await readAsync()
