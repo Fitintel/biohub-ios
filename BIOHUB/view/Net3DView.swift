@@ -29,7 +29,7 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
                         net.isPolling ? net.stopPolling() : net.startPolling()
                     }) {
                         Text(net.isPolling ? "Stop" : "Start")
-                    }
+                    }.disabled(net.isConfiguringDevices)
                     Spacer()
                     Button(action: {
                         net.resetPositions()
@@ -37,6 +37,12 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
                         Text("Reset Position")
                     }
                 }.padding()
+                if net.isConfiguringDevices {
+                    HStack {
+                        Text("Configuring devices")
+                        ProgressView()
+                    }.padding(.horizontal)
+                }
                 List(Array(net.b3ds.values), id: \.biodyn.uuid.uuidString) { b3d in
                     VStack {
                         Text("Biodyn \(b3d.biodyn.deviceInfoService.systemIdStr ?? "?")")
