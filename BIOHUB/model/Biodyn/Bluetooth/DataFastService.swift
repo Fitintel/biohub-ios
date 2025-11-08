@@ -126,7 +126,8 @@ public class DataFastService: FitnetBLEService, PDataFastService {
                 } else if i % numFloats == emgStart { // This is EMG
                     newEmg.append(DatedFloat(readTime: readTime!, read: floatArray[i]))
                 } else if i % numFloats == orientStart + 3 { // Last 4 floats are orientation quaternion
-                    newOrient.append(DatedFloat4(readTime: readTime!, read: SIMD4<Float>(floatArray[i-3], floatArray[i-2], floatArray[i-1], floatArray[i])))
+                    newOrient.append(DatedFloat4(readTime: readTime!,
+                                                 read: SIMD4<Float>(x: floatArray[i-2], y: floatArray[i-1], z: floatArray[i], w: floatArray[i-3])))
                 }
             }
             self.planar = DatedFloat3List(planar)

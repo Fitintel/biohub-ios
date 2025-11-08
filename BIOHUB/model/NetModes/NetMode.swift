@@ -70,10 +70,10 @@ where BDiscovery.Listener == any PeripheralsDiscoveryListener<B>,
                 await heartbeat.optimizeRTT()
             }
             await self.initAsync()
-            self.isConfiguringDevices = false
-            self.didConfigureDevices = true
             let interval: Duration = .milliseconds(5)
             while !Task.isCancelled {
+                self.isConfiguringDevices = false
+                self.didConfigureDevices = true
                 await readAsync()
                 try? await Task.sleep(for: interval)
             }

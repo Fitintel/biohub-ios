@@ -10,6 +10,7 @@ import SceneKit
 import simd
 import Observation
 import SceneKit.ModelIO
+import MetalKit
 
 struct BiodynView3D<B: PBiodyn, BD: PeripheralsDiscovery<B>>: View
 where BD.Listener == any PeripheralsDiscoveryListener<B> {
@@ -26,7 +27,7 @@ fileprivate struct BiodynView3DSK<B: PBiodyn, BD: PeripheralsDiscovery<B>>:  UIV
 where BD.Listener == any PeripheralsDiscoveryListener<B> {
     
     @Bindable var biodyn: Biodyn3D<B, BD>
-    @State var boxNode: SCNNode = SCNNode(geometry: SCNBox(width: 0.3, height: 0.3, length: 0.3, chamferRadius: 0.01)) // loadSTLModel(named: "BIODYN-100 v3")!
+    @State var boxNode: SCNNode = loadOBJModel(named: "BIODYN-100 v3")! // SCNNode(geometry: SCNBox(width: 0.3, height: 0.3, length: 0.3, chamferRadius: 0.01)) //
     @State var cameraNode: SCNNode = SCNNode()
     
     func makeUIView(context: Context) -> SCNView {
@@ -37,20 +38,32 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
         view.backgroundColor = .black
         
         // Add box
+        boxNode.simdScale = simd_float3(repeating: 0.18)
+        //        boxNode.geometry?.materials.append(SCNMaterial())
         scene.rootNode.addChildNode(boxNode)
         
         // Add light
         let light = SCNLight()
         light.type = .omni
+        light.intensity = 200
         let lightNode = SCNNode()
         lightNode.light = light
-        lightNode.position = SCNVector3(1, 1, 1)
+        lightNode.simdPosition = simd_float3(x: 2, y: -3, z: 2)
         scene.rootNode.addChildNode(lightNode)
+        
+        let dirLight = SCNLight()
+        dirLight.type = .omni
+        dirLight.intensity = 100
+        let ln2 = SCNNode()
+        ln2.light = dirLight
+        ln2.simdPosition = simd_float3(x: 2, y: 3, z: 2)
+        scene.rootNode.addChildNode(ln2)
         
         // Add camera
         let camera = SCNCamera()
         camera.zFar = 100
-        camera.zNear = 0.05
+        camera.zNear = 0.01
+        camera.wantsExposureAdaptation = false
         cameraNode.camera = camera
         cameraNode.position = SCNVector3(0, 0, 2.0)
         scene.rootNode.addChildNode(cameraNode)
@@ -59,45 +72,59 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
     }
     
     func updateUIView(_ uiView: SCNView, context: Context) {
-//        boxNode.simdEulerAngles.x = biodyn.angle.y
-//        boxNode.simdEulerAngles.y = biodyn.angle.z
-//        boxNode.simdEulerAngles.z = biodyn.angle.x
-//        boxNode.simdPosition.x = biodyn.position.x
-//        boxNode.simdPosition.y = biodyn.position.z
-//        boxNode.simdPosition.z = biodyn.position.y
         let q = biodyn.orientation
-        let biodyn_rot = simd_quatf(ix: q.x, iy: q.y, iz: q.z, r: q.w)
-        boxNode.simdOrientation = fixFlipZ(simd_quatf(angle: .pi/2, axis: SIMD3<Float>(0,0,1)) * biodyn_rot)
-        boxNode.geometry?.firstMaterial?.diffuse.contents = UIColor(red: CGFloat(biodyn.emg / 5.0), green: 1, blue: 0, alpha: 1.0)
-        
+        let biodyn_rot = Self.bdToSKQuat(simd_quatf(ix: q.x, iy: q.y, iz: q.z, r: q.w))
+        animateTo(boxNode, target: biodyn_rot, duration: 0.05)
+//        boxNode.geometry?.firstMaterial?.diffuse.contents = UIColor(red: CGFloat(biodyn.emg / 5.0), green: 1, blue: 0, alpha: 1.0)
         cameraNode.simdPosition = boxNode.simdPosition + simd_float3(0, 0, 2.0)
-//        log.info("[3DBiodynView] Biodyn at \(boxNode.simdPosition), camera at \(cameraNode.simdPosition)")
-//        log.info("[3DBiodynView] Oriented: \(biodyn.orientation)")
     }
     
-    func fixFlipZ(_ q: simd_quatf) -> simd_quatf {
-        let R = float3x3(q)
-        let S = float3x3(diagonal: SIMD3<Float>(1, 1, -1))
-        let Rfixed = S * R * S
-        return simd_quatf(Rfixed).normalized
+    func animateTo(_ node: SCNNode, target: simd_quatf, duration: CFTimeInterval = 0.6) {
+        SCNTransaction.begin()
+        SCNTransaction.animationDuration = duration
+        SCNTransaction.animationTimingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+        node.simdOrientation = simd_normalize(target)
+        SCNTransaction.commit()
     }
     
-    static func loadSTLModel(named filename: String) -> SCNNode? {
-        guard let url = Bundle.main.url(forResource: filename, withExtension: "stl") else {
-            log.error("[3DBiodynView] STL file not found")
+    static func bdToSKQuat(_ q: simd_quatf) -> simd_quatf {
+        return simd_normalize(simd_quatf(real: q.real, imag: bdToSkVec(q.imag)))
+    }
+    
+    static func bdToSkVec(_ v: simd_float3) -> simd_float3 {
+        return simd_float3(x: -v.x, y: v.z, z: v.y)
+    }
+    
+    static func loadOBJModel(named filename: String) -> SCNNode? {
+        guard let url = Bundle.main.url(forResource: filename, withExtension: "obj") else {
+            log.error("[3DBiodynView] OBJ file not found \(filename)")
             return nil
         }
-        let asset = MDLAsset(url: url)
-
+        
+        let allocator = MTKMeshBufferAllocator(device: MTLCreateSystemDefaultDevice()!)
+        let asset = MDLAsset(url: url, vertexDescriptor: nil, bufferAllocator: allocator)
+        asset.loadTextures()
+        
+        guard let mdlMesh = asset.object(at: 0) as? MDLMesh else { return SCNNode() }
+        
+        // Smooth normals: π = fully smooth; use lower (e.g. 0.5) to keep sharp edges
+        mdlMesh.addNormals(withAttributeNamed: MDLVertexAttributeNormal, creaseThreshold: .pi)
+        
+        // Optional but recommended for PBR + normal maps
+        mdlMesh.addTangentBasis(
+            forTextureCoordinateAttributeNamed: MDLVertexAttributeTextureCoordinate,
+            normalAttributeNamed: MDLVertexAttributeNormal,
+            tangentAttributeNamed: MDLVertexAttributeTangent
+        )
+        
         let scene = SCNScene(mdlAsset: asset)
         let node = SCNNode()
         for child in scene.rootNode.childNodes {
             node.addChildNode(child)
         }
-        node.simdScale = simd_float3(repeating: 0.01)
         
-        log.info("[3DBiodynView] Loaded 3MF: \(filename)")
-        
+        log.info("[3DBiodynView] Loaded: \(filename)")
         return node
     }
+    
 }
