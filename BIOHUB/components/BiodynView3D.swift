@@ -66,12 +66,20 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
 //        boxNode.simdPosition.y = biodyn.position.z
 //        boxNode.simdPosition.z = biodyn.position.y
         let q = biodyn.orientation
-        boxNode.simdOrientation = simd_quatf(ix: q.x, iy: q.y, iz: q.z, r: q.w)
+        let biodyn_rot = simd_quatf(ix: q.x, iy: q.y, iz: q.z, r: q.w)
+        boxNode.simdOrientation = fixFlipZ(simd_quatf(angle: .pi/2, axis: SIMD3<Float>(0,0,1)) * biodyn_rot)
         boxNode.geometry?.firstMaterial?.diffuse.contents = UIColor(red: CGFloat(biodyn.emg / 5.0), green: 1, blue: 0, alpha: 1.0)
         
         cameraNode.simdPosition = boxNode.simdPosition + simd_float3(0, 0, 2.0)
 //        log.info("[3DBiodynView] Biodyn at \(boxNode.simdPosition), camera at \(cameraNode.simdPosition)")
 //        log.info("[3DBiodynView] Oriented: \(biodyn.orientation)")
+    }
+    
+    func fixFlipZ(_ q: simd_quatf) -> simd_quatf {
+        let R = float3x3(q)
+        let S = float3x3(diagonal: SIMD3<Float>(1, 1, -1))
+        let Rfixed = S * R * S
+        return simd_quatf(Rfixed).normalized
     }
     
     static func loadSTLModel(named filename: String) -> SCNNode? {
