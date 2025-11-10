@@ -29,20 +29,24 @@ where BDiscovery.Listener == any PeripheralsDiscoveryListener<B> {
                     
                     let stream = self.ensureStream(biodyn)
                     
-                    if let emg = biodyn.dfService.emg {
-                        stream.emg.addAll(emg) // Add emg data
-                    }
-                    
                     if let planar = biodyn.dfService.planarAccel {
                         let beforeCnt = stream.imu.planar.latest.list.count
                         stream.imu.addAllPlanar(planar) // Add planar data
                         let afterCnt = stream.imu.planar.latest.list.count
                         let canTake = planar.list.count
+//                        if planar.list.count > 2 {
+//                            log.info("Delta is \(planar.list[1].readTime.timeIntervalSince(planar.list[0].readTime) * 1000)ms")
+//                        }
                         Task { @MainActor in
+                            log.info("Before \(beforeCnt), after \(afterCnt), diff \(afterCnt - beforeCnt)")
                             self.capacity.add(Double(afterCnt - beforeCnt) / Double(canTake)) // Add point difference to read avg taken
                         }
                     }
                     
+                    if let emg = biodyn.dfService.emg {
+                        stream.emg.addAll(emg) // Add emg data
+                    }
+
                     if let gyro = biodyn.dfService.gyroAccel {
                         stream.imu.addAllGyro(gyro) // Add gyro data
                     }

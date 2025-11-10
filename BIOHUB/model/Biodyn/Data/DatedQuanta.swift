@@ -51,11 +51,9 @@ where T: Quanta {
 @Observable
 public class DatedQList<T>: Identifiable, Observable, Encodable, Decodable
 where T: Quanta {
-    public let toleranceSeconds = Double(5) / Double(1000) // 5 ms
-    
     public let id = UUID()
     public var list: [DatedQuanta<T>]
-    private var newest = Date.now
+    private var newest = Date.init(timeIntervalSince1970: 0)
 
     public required init() {
         self.list = []

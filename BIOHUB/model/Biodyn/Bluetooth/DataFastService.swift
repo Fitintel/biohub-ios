@@ -113,7 +113,7 @@ public class DataFastService: FitnetBLEService, PDataFastService {
             if floatArray.count % numFloats != 0 {
                 log.error("[DataFast] INCORRECT READ COUNT")
             }
-            for i in 0...floatArray.count {
+            for i in 0...(floatArray.count-1) {
                 if i % numFloats == tickerStart + 1 { // First 2 "floats" bytes are really a uint64_t ticker
                     let ticker = UInt64(floatArray[i-1].bitPattern) | (UInt64(floatArray[i].bitPattern) << UInt32.bitWidth)
                     readTime = Date.fromFitnetTick(ticker)
