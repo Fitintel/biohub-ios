@@ -10,14 +10,26 @@ import simd
 import Charts
 import OSLog
 
-struct DatedSIMD3LineChart: View {
+public struct DatedSIMD3LineChart: View {
     
     let max: Float
     @Bindable var data: DatedFloat3Segments
     @State private var lastSnapshot: [[DatedFloat3]] = []
     @State private var snapshotTask: Task<Void, Never>? = nil
+    let height: CGFloat
     
-    var body: some View {
+    public init(
+        max: Float,
+        data: DatedFloat3Segments,
+        height: CGFloat = 250
+    ) {
+        self.max = max
+        self.data = data
+        self.height = height
+    }
+
+
+    public var body: some View {
         Chart {
             let segments: [[DatedFloat3]] = lastSnapshot
             ForEach(segments.indices, id:\.self) { (i: Int) in
@@ -51,7 +63,7 @@ struct DatedSIMD3LineChart: View {
             "Y": .green,
             "Z": .blue,
         ])
-        .frame(height: 250)
+        .frame(height: height)
         .onAppear {
             snapshotTask?.cancel()
             snapshotTask = Task {

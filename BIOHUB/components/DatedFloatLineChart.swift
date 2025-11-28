@@ -10,14 +10,25 @@ import simd
 import Charts
 import OSLog
 
-struct DatedFloatLineChart: View {
+public struct DatedFloatLineChart: View {
     
     let max: Float
     @Bindable var data: DatedFloatSegments
     @State private var lastSnapshot: [[DatedFloat]] = []
     @State private var snapshotTask: Task<Void, Never>? = nil
+    let height: CGFloat
     
-    var body: some View {
+    public init(
+        max: Float,
+        data: DatedFloatSegments,
+        height: CGFloat = 250
+    ) {
+        self.max = max
+        self.data = data
+        self.height = height
+    }
+
+    public var body: some View {
         Chart {
             let segments: [[DatedFloat]] = lastSnapshot
             ForEach(segments.indices, id:\.self) { i in
@@ -33,7 +44,7 @@ struct DatedFloatLineChart: View {
         .chartForegroundStyleScale([
             "Value": .red,
         ])
-        .frame(height: 250)
+        .frame(height: height)
         .onAppear {
             snapshotTask?.cancel()
             snapshotTask = Task {

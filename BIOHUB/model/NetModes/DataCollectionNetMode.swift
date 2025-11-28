@@ -38,7 +38,7 @@ where BDiscovery.Listener == any PeripheralsDiscoveryListener<B> {
 //                            log.info("Delta is \(planar.list[1].readTime.timeIntervalSince(planar.list[0].readTime) * 1000)ms")
 //                        }
                         Task { @MainActor in
-                            log.info("Before \(beforeCnt), after \(afterCnt), diff \(afterCnt - beforeCnt)")
+//                            log.info("Before \(beforeCnt), after \(afterCnt), diff \(afterCnt - beforeCnt)")
                             self.capacity.add(Double(afterCnt - beforeCnt) / Double(canTake)) // Add point difference to read avg taken
                         }
                     }

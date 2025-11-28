@@ -11,7 +11,7 @@ struct ConfigureNetView<B: PBiodyn, BD: PeripheralsDiscovery<B>>: View
 where BD.Listener == any PeripheralsDiscoveryListener<B> {
     
     @Bindable var app: AppState<B, BD>
-    @State private var netMode = NetMode.net3d
+    @State private var netMode = NetMode.training
     @State private var confirmRecreateNet = false
     @State private var netModeStarted = false
     
@@ -21,6 +21,7 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
             HStack {
                 Text("Net Mode: ")
                 Picker("Net Mode", selection: $netMode) {
+                    Text("Training").tag(NetMode.training)
                     Text("3D View").tag(NetMode.net3d)
                     Text("Data Collection").tag(NetMode.dataCollection)
                     Text("Self Test").tag(NetMode.selfTest)
@@ -33,6 +34,7 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
                     case .selfTest: app.net.path.append(NetViewRoute.selfTest)
                     case .dataCollection: app.net.path.append(NetViewRoute.dataCollection)
                     case .net3d: app.net.path.append(NetViewRoute.net3d)
+                    case .training: app.net.path.append(NetViewRoute.training)
                     }
                 }) {
                     Text("Start Net")

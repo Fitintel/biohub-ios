@@ -26,4 +26,16 @@ public struct FitnetUser: Encodable, Decodable {
             .setData(encodeData)
         log.info("[\(Self.TAG)] Uploaded full data")
     }
+    
+    func uploadTrainingData(label: String, data: Dictionary<String, FullDataStream>) async throws {
+        let uploadTime = Date.now
+        let encodeData = try Firestore.Encoder().encode(TrainingDataRecord(data: TrainingDataStream(data: data, label: label), time: uploadTime))
+        try await Firestore.firestore()
+            .collection("TrainingData")
+            .document(uid)
+            .collection("Sessions")
+            .document(uploadTime.ISO8601Format())
+            .setData(encodeData)
+        log.info("[\(Self.TAG)] Uploaded training data")
+    }
 }
