@@ -27,6 +27,14 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
                     }) {
                         Text("Back")
                     }
+                    Spacer()
+                    Button(action: {
+                        dNet.reset()
+                        isUploaded = false
+                    }) {
+                        Text("Clear Data")
+                    }
+                    .disabled(isUploading || dNet.isConfiguringDevices)
                 }
                 .padding()
                 HStack {
@@ -36,15 +44,6 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
                         Text(dNet.isPolling ? "Stop Reading" : "Start Reading")
                     }.disabled(dNet.isConfiguringDevices || isUploading)
                     Spacer()
-                    Button(action: {
-                        dNet.reset()
-                        isUploaded = false
-                    }) {
-                        Text("Clear Data")
-                    }
-                    .disabled(isUploading || dNet.isConfiguringDevices)
-                }.padding(.horizontal)
-                HStack {
                     Button(action: {
                         isUploading = true
                         Task {
@@ -63,8 +62,7 @@ where BD.Listener == any PeripheralsDiscoveryListener<B> {
                     if (isUploading) {
                         ProgressView()
                     }
-                }
-                .padding()
+                }.padding(.horizontal)
                 HStack {
                     VStack {
                         Text("Enter data label below:")
